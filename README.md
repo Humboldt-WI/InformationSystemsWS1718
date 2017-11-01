@@ -1,4 +1,4 @@
-# InformationSystemsWS1718
+# Seminar Information Systems WS 1718
 
 We will collect the code and tutorials centrally in this repository. Please 
 
