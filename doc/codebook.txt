@@ -33,5 +33,5 @@ Variables:
   Kandidatur: numeric value (1=direct candidate only, 2=only party ticket (Liste), 3=both)
   Listenplatz: number on party ticket (independent of winning his district) of his party in his federal state
   WKR_NR: Number of district were the candidate was running
-  MdB_2013: 1=If the candidate was already delegate before 2017.
-  MdB_2017: 1=If the candidate is now new in the parliament.
+  MdB_2013: 1=If the candidate was a delegate after the election in 2013 and was running again in 2017 
+  MdB_2017: 1=If the candidate is now in parliament.
