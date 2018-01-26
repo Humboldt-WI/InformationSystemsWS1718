@@ -1,0 +1,42 @@
+1. Einleitung
+        motivation, anwendungsfelder, abgrenzung zu ja/nein -vorhersagen - Ben (3 Min)
+        Datensatz vorstellen (PBC Datensatz) - Arvid (3 Min)
+
+2. Vorstellung typischer techniken
+   2.1 Kaplan Meyer - Arvid (8 Min)
+        codebeispiel mit anwendung auf datensatz
+        vorstellung und erläuterung der ergebnisse
+        mathematische erklärung
+
+   2.2 Cox - Ben (15 Min)
+        codebeispiel mit anwendung auf datensatz, vorstellung und erläuterung der ergebnisse
+        mathematische erklärung
+
+   2.3 AFT - Arvid (8 Min)
+        codebeispiel mit anwendung auf datensatz,
+        vorstellung und erläuterung der ergebnisse und Unterschiede zu Cox
+
+   2.4  Survival Gradient Boosting oder  Mixture Cure Model - Ben (8 Min)
+        codebeispiel mit anwendung auf datensatz,
+        vorstellung und erläuterung der ergebnisse und Unterschiede in der Annahme zu Cured Fraktion der Daten
+
+   2.5 Survival Tree - Ben (8 Min)
+        oder  Survival Random Trees
+        oder  Deep Survival Analysis
+        codebeispiel mit anwendung auf datensatz,
+        vorstellung und erläuterung der ergebnisse
+
+
+   3. Benchmark - Arvid (15 Min)
+        Vorstellung der Bewertungsmetrik
+        Auswertung und Vergleich der Ergebnisse jedes Modells
+        Codebeispiele
+
+
+   4. Abschluss und Ausblick - Ben & Arvid (10 Min)
+        am besten performt modell x, möglicherweise weil ... - Ben (5 Min)
+        andere szenarien/use cases bringen evtl andere ergebnisse - Arvid (5 Min)
+
+Total Min = 78 Min
+     Ben = 39 Min
+     Arvid = 39 Min
