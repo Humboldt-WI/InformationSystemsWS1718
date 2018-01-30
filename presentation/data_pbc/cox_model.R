@@ -14,6 +14,9 @@ summary(cox_model)
 ##Each strata has a different baseline hazard function but the remaining covariates are assumed to be constant.
 cox_model_2 <- coxph(Surv(pbc$time, pbc$status == 2) ~ pbc$age + strata(pbc$edema) + log(pbc$bili) + log(pbc$albumin) + log(pbc$protime))
 cox_model_3 <- coxph(Surv(pbc$time, pbc$status == 2) ~ pbc$age + pbc$edema +strata(pbc$stage) + log(pbc$bili) + log(pbc$albumin) + log(pbc$protime))
+cox_model_4 <- coxph(Surv(pbc$time, pbc$status == 2) ~ pbc$age + pbc$edema + log(pbc$bili) + log(pbc$albumin) + log(pbc$protime) + (pbc$ascites) + (pbc$hepato) + (pbc$spiders))
+cox_model_5 <- coxph(Surv(pbc$time, pbc$status == 2) ~ pbc$age + pbc$edema + log(pbc$bili) + log(pbc$albumin) + log(pbc$protime) + log(pbc$chol) + log(pbc$copper) + log(pbc$alk.phos) + log(pbc$ast) + log(pbc$trig) + log(pbc$platelet) + pbc$stage)
+
 
 ##For plotting mean covariates of Cox, hence the chances of survival for a "mean" patient with liver cancer
 plot(survfit(cox_model), lwd = 2, main = 'Fitted survival function at mean covariates', xlab = 'Days', ylab = 'Survival')
