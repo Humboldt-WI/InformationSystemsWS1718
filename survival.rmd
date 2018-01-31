@@ -1,0 +1,355 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r include = FALSE}
+if(!require("survival")) install.packages("survival"); library("survival")
+if(!require("survminer")) install.packages("survminer"); library("survminer")
+if(!require("ggplot2")) install.packages("ggplot2"); library("ggplot2")
+if(!require("ggfortify")) install.packages("ggfortify"); library("ggfortify")
+if(!require("survAUC")) install.packages("survAUC"); library("survAUC")
+if(!require("pec")) install.packages("pec"); library("pec")
+if(!require("timereg")) install.packages("timereg"); library("timereg")
+if(!require("KMsurv")) install.packages("KMsurv"); library("KMsurv")
+if(!require("gbm")) install.packages("gbm"); library("gbm")
+```
+#1. Introduction
+Survival analysis encompasses a variety of techniques to predict if or when a subject under observation will experience an event and to find out the hazard of an event going to happen.
+
+Typical fields of application are:
+
+Medical studies
+Credit risk modeling
+Marketing
+Failure prediction and monitoring of technical devices
+
+Three Main groups
+
+Non-parametric:       Semi-parametric:                  Parametric:
+Kaplan Meyer          Cox Proportional Hazard           AFT
+Cox CI                Cox GBM
+```{r include = FALSE}
+sagroups <-  matrix( nrow=3, ncol=3) 
+sagroups <- as.data.frame(sagroups)
+colnames(sagroups) <- c("Non-parametric:","Semi-parametric:,Parametric: ")
+sagroups[1,1] <- c("Kaplan Meyer")
+sagroups[1,2] <- c("Cox Proportional Hazard")
+sagroups[1,3] <- c("Accelerated Failure Time")
+sagroups[2,2] <- c("Gradient Boosting with Cox")
+```
+print(sagroups)
+##Dataset overview
+
+
+
+Table of dataset characteristics
+
+
+
+#2. Survival Analysis Techniques
+##2.1 Kaplan Meyer
+```{r}
+#Kaplan Meier
+# to indicate begin of each measuring period we specifiy a startdate
+KM_data <- c
+KM_data$startdate <- 0
+KM_data[KM_data$date ==1,]$startdate <- 0
+KM_data[KM_data$date ==90,]$startdate <- 1
+KM_data[KM_data$date ==180,]$startdate <-90
+KM_data[KM_data$date ==270,]$startdate <- 180
+KM_data[KM_data$date ==366,]$startdate <- 270
+```
+
+###Overview of survival rates by Kaplan Meyer
+```{r}
+
+#creating the survival object
+with(KM_data, Surv(startdate,date, failure))
+KM_fitted <- survfit(Surv(startdate,date, failure) ~ 1, data=KM_data)
+#show plot
+autoplot(KM_fitted)
+```
+
+
+
+##2.2 Cox Proportional Hazard
+### Formal Background
+Formulas, etc
+### Datasets en Detail
+#### PDC Set
+```{r}
+# for pbc dataset
+data(pbc,package = "survival")
+
+```
+####Number of Items:
+```{r}
+print(NROW(pbc))
+```
+
+####Number of Items to fail:
+```{r}
+print(NROW(pbc[pbc$status ==2,]))
+```
+
+####Structure:
+```{r}
+print(head(pbc,10))
+```
+#### HDD Set
+Contains hard disc failure predictors (SMART States)
+```{r include = FALSE}
+c <- readRDS("./data_2016_rds/hdd_Dataset.rds")
+```
+#####Number of Items:
+```{r}
+print(NROW(unique(c$serial_number)))
+```
+
+#####Number of Items to fail:
+```{r}
+print(NROW(unique(c[c$failure ==1,]$serial_number)))
+```
+
+#####Structure:
+```{r}
+print(c[c$serial_number %in% c("MJ0351YNG9Z0XA","W300K6X5"), ])
+```
+
+
+###Preparation
+#### Train and test data sets for PDC set
+```{r}
+
+pbc_clean <- pbc[!is.na(pbc$age) 
+                 & !is.na(pbc$edema) 
+                 & !is.na(pbc$bili) 
+                 & !is.na(pbc$albumin) 
+                 & !is.na(pbc$protime)
+                 ,]  
+
+
+#Selecting 75%  from initial population
+samplepbc <- sample.int(n = NROW(pbc_clean), size = floor(.75*NROW(pbc_clean)), replace = F)
+trainpbc <- pbc_clean[samplepbc,]
+testpbc  <- pbc_clean[-samplepbc,]
+```
+
+
+#### Train and test data sets for HDD set
+```{r include = FALSE}
+
+cox_data <- c
+cox_data$startdate <- 0
+cox_data[cox_data$date ==1,]$startdate <- 0
+cox_data[cox_data$date ==90,]$startdate <- 1
+cox_data[cox_data$date ==180,]$startdate <-90
+cox_data[cox_data$date ==270,]$startdate <- 180
+cox_data[cox_data$date ==366,]$startdate <- 270
+
+```
+```{r}
+
+trainsn <- unique(cox_data[cox_data$startdate ==0,]$serial_number)
+trainsn <- trainsn[sample(NROW(trainsn))] # shuffle
+
+#Selecting 75% of serial numbers from initial population
+sample <- sample.int(n = NROW(trainsn), size = floor(.75*NROW(trainsn)), replace = F)
+train <- trainsn[sample ]
+test  <- trainsn[-sample ]
+
+trainset <- cox_data[cox_data$serial_number %in% train,]
+testset <- cox_data[cox_data$serial_number %in% test,]
+```
+
+
+
+### Application and code
+#### Cox PH on PBC Dataset
+building the cox model
+```{r}
+pbc.cox <- coxph(Surv(time,status ==2 ) ~age + edema +log(bili) +log(albumin)+log(protime), data = trainpbc)
+print(summary(pbc.cox))
+
+```
+##### Predicting hazard ratios on testset 
+relative to the sample average for all predictor variables -> these are the betas
+```{r}
+coxpredicted_trainpbc <- predict(pbc.cox,type="lp")  
+coxpredicted_testpbc <- predict(pbc.cox, newdata=testpbc,type="lp") 
+
+print(summary(coxpredicted_testpbc))
+```
+##### Hazard for each subject 
+for day 110, (basehazard*exp(lp))  
+```{r}
+
+cox_bazehaz <- basehaz(pbc.cox)
+cox_predhaz_t110 <- cox_bazehaz[6,1]*coxpredicted_trainpbc
+print(head(cox_predhaz_t110, n=10))
+```
+
+#####Calculate Survival probabilities of subjects in testset
+```{r}
+Pred_Prob <- predictSurvProb(pbc.cox,newdata=testpbc,times=c(110))  
+print(head(Pred_Prob, n=10))
+```
+
+
+#### Cox PH on HDD Dataset
+#####Building the cox model
+```{r}
+
+train.cox <- coxph(Surv(startdate, date, failure) ~ smart_9_normalized + smart_5_normalized +smart_187_normalized 
+                   +smart_188_normalized+smart_197_normalized + smart_198_normalized,
+                   data = trainset)
+print(train.cox)
+```
+
+##### Predicting hazard ratios on testset 
+```{r}
+coxpredicted_train <- predict(train.cox,type="lp")  
+coxpredicted_test <- predict(train.cox, newdata=testset,type="lp") 
+print(head(coxpredicted_test,10))
+```
+
+
+##2.2 Accelarated Time To Failure Model
+
+```{r}
+
+```
+
+##2.3 Survival Gradient Boosting with Cox
+```{r include = FALSE}
+
+if(!require("KMsurv")) install.packages("KMsurv"); library("KMsurv")
+if(!require("survAUC")) install.packages("survAUC"); library("survAUC")
+if(!require("survival")) install.packages("survival"); library("survival")
+```
+### Formal Background
+Formulas, etc
+
+
+###Application on PDC Set
+#### Building the model
+```{r}
+
+gbmpbc = gbm(pbc.cox,
+             data = trainpbc,
+             distribution = "coxph",
+             n.trees = 2500,
+             shrinkage = 0.02,
+             n.minobsinnode = 4)
+
+print(summary(gbmpbc))
+```
+#### Predicting hazard ratios on testset 
+```{r}
+
+gbmtrainpbc = predict(object = gbmpbc,
+                      newdata = trainpbc,
+                      n.trees = 1500,
+                      type = "response")
+
+gbmtestpbc = predict(object = gbmpbc,
+                     newdata = testpbc,
+                     n.trees = 1500,
+                     type = "response")
+print(head(gbmtestpbc,10))
+
+```
+
+```{r include = FALSE}
+Survresptrainpbc <- Surv(trainpbc$time,trainpbc$status==2)
+Survresptestpbc <- Surv(testpbc$time,testpbc$status == 2)
+CI_gbmpbc <- BeggC(Survresptrainpbc, Survresptestpbc, gbmtrainpbc, gbmtestpbc)
+if(CI_gbmpbc<=0.5){
+  CI_gbmpbc =1-CI_gbmpbc
+}
+```
+
+### Application on HDD Set
+gbm does not support intervall partitioned data. therefore  we look at the full timespan
+
+#### Building the model
+```{r}
+train.coxgbm <- coxph(Surv( date, failure) ~ smart_9_normalized + smart_5_normalized +smart_187_normalized 
+                      +smart_188_normalized+smart_197_normalized + smart_198_normalized,
+                      data = trainset)
+
+
+#we don't have startdate here
+gbmhdd = gbm(train.coxgbm,
+             data = trainset,
+             distribution = "coxph",
+             n.trees = 2500,
+             shrinkage = 0.02,
+             n.minobsinnode = 4)
+print(summary(gbmhdd))
+```
+
+#### Predicting hazard ratios on testset 
+```{r}
+gbmtrainhdd = predict(object = gbmhdd,
+                      newdata = trainset,
+                      n.trees = 1500,
+                      type = "response")
+
+
+gbmtesthdd = predict(object = gbmhdd,
+                     newdata = testset,
+                     n.trees = 1500,
+                     type = "response")
+
+print(head(gbmtesthdd,10))
+
+
+
+```
+
+```{r include = FALSE}
+Survresptrainhddgbm <- Surv(trainset$date,trainset$failure)
+Survresptesthddgbm <- Surv(testset$date,testset$failure)
+CI_gbmhdd <- BeggC(Survresptrainhddgbm, Survresptesthddgbm, gbmtrainhdd, gbmtesthdd)
+if(CI_gbmhdd<=0.5){
+  CI_gbmhdd =1-CI_gbmhdd
+}
+```
+
+
+
+#3. Benchmark and Prediction 
+##3.x Concordance Index
+Explanation and Formula
+### CI for COX PH HDD Set
+```{r}
+#Calculating Concordance Index to assess results of prediction
+#CI-Formula
+#cox implicitly ranks subjects by hazard (thus by survival time)
+#goodness of ranking can me measured by CI
+Survresptrain <- Surv(trainset$startdate,trainset$date, trainset$failure  ) # creating survival objects as response variables
+Survresptest <- Surv(testset$startdate,testset$date, testset$failure)     # we don't need baseline hazards to measure the ranking since every item is affected by the bh in the same ways
+                                                                          # only the relative hazard is of interest here
+
+#Cox ranks implicitly the survival times but CI ranks it according to 
+CI_cox <- BeggC(Survresptrain, Survresptest, coxpredicted_train, coxpredicted_test)
+if(CI_cox<=0.5){
+  CI_cox =1-CI_cox
+}
+```
+### CI overview
+display a table here
+```{r}
+print(CI_coxpbc)
+print(CI_cox)
+print(CI_gbmpbc)
+print(CI_gbmhdd)
+
+```
+CI Could also be used to learn a GBM Model (GBMCI)
+Model tries to rank subjects by survival times so that CI becomes optimal
+
+
+#4. Conclusion and Outlook
