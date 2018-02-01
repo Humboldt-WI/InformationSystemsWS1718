@@ -134,7 +134,7 @@ print(c[c$serial_number %in% c("MJ0351YNG9Z0XA","W300K6X5"), ])
 #### Create a survival element by Surv function
 #### Load the package data
 
-```{r }
+```{r include = FALSE}
 data(pbc, package="survival")
 days_of_survival <- with (pbc, Surv(pbc$time, pbc$status==2))
 print(days_of_survival)
@@ -353,7 +353,7 @@ coxpredicted_test <- predict(train.cox, newdata=testset,type="lp")
 
 ##2.2 Accelarated Time To Failure Model
 ###2.2.1 Preparation
-```{r}
+```{r include = FALSE}
 ##First adjust data quickly
 ##Change status to be binary (1 alive, but liver transplantation, 0 is alive, 2 is dead)
 pbc$status[which(pbc$status == 1)] <- 0
@@ -379,12 +379,7 @@ summary(atf_model_log)
 ```
 
 ```{r}
-
-
-
 ####2.2.3 Receive AUC and ROC plot for all ATF models
-```{r}
-
 par(mfrow = c(2, 2))
 pred_atf <- prediction(predict(atf_model_weibull), pbc$status)
 perf_atf <- performance(pred_atf,"tpr","fpr")
@@ -520,7 +515,6 @@ if(CI_gbmhdd<=0.5){
 data(pbc)
 pbc$protime[which(is.na(pbc$protime))] <- 0.1
 cox_model <- coxph(Surv(time, status == 2) ~ age + edema + log(bili) + log(albumin) + log(protime), data=pbc)
-summary(cox_model)
 curves <- survfit(cox_model, pbc)
 curves[10]
 curves[100]
@@ -533,7 +527,7 @@ plot(curves[200], xlab = "Days", ylab="Survival Probability")
 ```{r}
 ## To add entirely new data and see its performance, we have to enrich X
 ## curves <- survfit(cox_model, newdata = X)
-plot(survfit(cox_model, newdata=data.frame(age=60,edema=2.0,bili=2.6,albumin=1.3,protime=3)),
+plot(survfit(cox_model, newdata=data.frame(age=20,edema=2.0,bili=2.6,albumin=1.3,protime=3)),
 xlab = "Days", ylab="Survival")
 ```
 ##3.2. Predicting the future outlook
@@ -590,7 +584,7 @@ auc.perf@y.values
 ```
 ##3.4 Benchmark the models
 Training a data set
-```{r}
+```{r include = FALSE}
 data(pbc,package = "survival")
 pbc_clean <- pbc[!is.na(pbc$age)
 & !is.na(pbc$edema)
@@ -602,7 +596,7 @@ pbc_clean <- pbc[!is.na(pbc$age)
 ```
 
 Selecting 33%, 66% and 100%  from initial population
-```{r}
+```{r include = FALSE}
 samplepbc <- sample.int(n = NROW(pbc_clean), size = floor(.33*NROW(pbc_clean)), replace = F)
 trainpbc_1_3 <- pbc_clean[samplepbc,]
 testpbc_2_3  <- pbc_clean[-samplepbc,]
@@ -613,7 +607,7 @@ testpbc_1_3  <- pbc_clean[-samplepbc,]
 
 
 Building the trained proportional hazard cox models
-```{r}
+```{r include = FALSE}
 pbc.cox_1_3 <- coxph(Surv(time,status ==2 ) ~age + edema +log(bili) +log(albumin)+log(protime), data = trainpbc_1_3)
 pbc.cox_2_3 <- coxph(Surv(time,status ==2 ) ~age + edema +log(bili) +log(albumin)+log(protime), data = trainpbc_2_3)
 pbc.cox_3_3 <- coxph(Surv(time,status ==2 ) ~age + edema +log(bili) +log(albumin)+log(protime), data = pbc_clean)
@@ -621,7 +615,7 @@ pbc.cox_3_3 <- coxph(Surv(time,status ==2 ) ~age + edema +log(bili) +log(albumin
 ```
 
 Building a gradient boosting model from the above mentioned cox model
-```{r}
+```{r include = FALSE}
 gbmpbc_1_3 = gbm(pbc.cox_1_3,
 data = trainpbc_1_3,
 distribution = "coxph",
@@ -645,7 +639,7 @@ n.minobsinnode = 4)
 ```
 
 Modelling the ATF models
-```{r}
+```{r include = FALSE}
 
 atf_model_weibull_1_3 <- survreg(Surv(time, status == 2) ~ age + edema +log(bili) +log(albumin)+log(protime), dist='weibull', data = trainpbc_1_3)
 atf_model_weibull_2_3 <- survreg(Surv(time, status == 2) ~ age + edema +log(bili) +log(albumin)+log(protime), dist='weibull', data = trainpbc_2_3)
@@ -664,7 +658,7 @@ atf_model_log_3_3 <- survreg(Surv(time, status == 2) ~ age + edema +log(bili) +l
 ##3.5 Receive AUCs for all models
 
 First, generate a binary variable again
-```{r}
+```{r include = FALSE}
 trainpbc_1_3$status[which(trainpbc_1_3$status == 1)] <- 0
 trainpbc_1_3$status[which(trainpbc_1_3$status == 2)] <- 1
 trainpbc_2_3$status[which(trainpbc_2_3$status == 1)] <- 0
@@ -675,7 +669,7 @@ pbc_clean$status[which(pbc_clean$status == 2)] <- 1
 
 
 Now generate predictions on all models
-```{r}
+```{r include = FALSE}
 pred_coxph_1_3 <- prediction(predict(pbc.cox_1_3), trainpbc_1_3$status)
 pred_coxph_2_3 <- prediction(predict(pbc.cox_2_3), trainpbc_2_3$status)
 pred_coxph_3_3 <- prediction(predict(pbc.cox_3_3), pbc_clean$status)
@@ -708,7 +702,7 @@ pred_atf_model_log_3_3 <- prediction(predict(atf_model_log_3_3), pbc_clean$statu
 
 
 Now receive the AUC values for each model
-```{r}
+```{r include = FALSE}
 auc.perf_coxph_1_3 = performance(pred_coxph_1_3, measure = "auc")
 auc.perf_coxph_2_3 = performance(pred_coxph_2_3, measure = "auc")
 auc.perf_coxph_3_3 = performance(pred_coxph_3_3, measure = "auc")
