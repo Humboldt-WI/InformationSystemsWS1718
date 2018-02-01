@@ -70,10 +70,10 @@ autoplot(model_fit_hepato) +
 survdiff(Surv(pbc$time, pbc$status==2)~pbc$hepato)
 
 ##Using Survminer package, simple curve:
-ggsurvplot(model_fit)
+ggsurvplot(model_fit_trt, data = pbc)
 
 ##Curve containing risk table:
-ggsurv <- ggsurvplot(model_fit, title = "Survival Time of \n Biliary Cirrhosis Patients \n",
+ggsurv <- ggsurvplot(model_fit_trt, data = pbc, title = "Survival Time of \n Biliary Cirrhosis Patients \n",
 legend.title = "Treatment",
 legend.labs = c("One", "Two"),
 xlab = "\n Survival Time (days) ",
