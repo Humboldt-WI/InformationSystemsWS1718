@@ -143,7 +143,6 @@ print(days_of_survival)
 ###2.1.2. Application of KM
 #### Produce and plot Kaplan-Meier estimator by survfit function
 ```{r}
-
 model_fit_simple <- survfit(Surv(pbc$time, pbc$status == 2) ~ 1)
 autoplot(model_fit_simple) +
     labs(x = "\n Survival Time (days) ", y = "Survival Probabilities \n",
@@ -161,7 +160,6 @@ print(summary(model_fit_simple))
 
 ####Plot differences on the different treatments
 ```{r}
-
 model_fit_trt <- survfit(Surv(pbc$time, pbc$status == 2) ~ pbc$trt)
 autoplot(model_fit_trt) +
     labs(x = "\n Survival Time (days) ", y = "Survival Probabilities \n",
@@ -170,29 +168,23 @@ autoplot(model_fit_trt) +
     axis.title.x = element_text(face = "bold", color = "#FF7A33", size = 12),
     axis.title.y = element_text(face = "bold", color = "#FF7A33", size = 12),
     legend.title = element_text(face = "bold", size = 10))
-
 ```
-
-
-
 
 ####Show Kaplan-Meier estimates
 ```{r}
 print(summary(model_fit_trt))
 ```
 
-
-####Performing the Mantel-Haenzel test 
-Performing the Mantel-Haenzel test on conditional indepencence by function survdiff.  
-Efficient in comparing groups that differ by categorical variables, but not continuous ones.  
-The test statistic value is less than the critical value (using chi-square table) for  
-degree of freedom equal to one. Hence, we can say that there is no significant difference  
-between the two groups regarding the survival. We can follow that the actual treatment  
-of these patients gave little impact on the survival chances.  
+####Performing the Mantel-Haenzel test
+Performing the Mantel-Haenzel test on conditional indepencence by function survdiff.
+Efficient in comparing groups that differ by categorical variables, but not continuous ones.
+The test statistic value is less than the critical value (using chi-square table) for
+degree of freedom equal to one. Hence, we can say that there is no significant difference
+between the two groups regarding the survival. We can follow that the actual treatment
+of these patients gave little impact on the survival chances.
 ```{r}
 survdiff(Surv(pbc$time, pbc$status==2)~pbc$trt)
 ```
-
 
 ####Plot differences on males and females and test log-rank test
 ```{r}
@@ -207,8 +199,6 @@ autoplot(model_fit_sex) +
 
 survdiff(Surv(pbc$time, pbc$status==2)~pbc$sex)
 ```
-
-
 
 ####Plot differences on patience with hepatitis and without hepatitis and test log-rank test
 ```{r}
@@ -228,9 +218,6 @@ survdiff(Surv(pbc$time, pbc$status==2)~pbc$hepato)
 ```{r}
 ggsurvplot(model_fit_trt, data = pbc)
 ```
-
-
-
 
 ####Curve containing risk table:
 ```{r}
@@ -267,12 +254,12 @@ See blackboard for formula!
 #### Train and test data sets for PDC set
 ```{r}
 
-pbc_clean <- pbc[!is.na(pbc$age) 
-                 & !is.na(pbc$edema) 
-                 & !is.na(pbc$bili) 
-                 & !is.na(pbc$albumin) 
+pbc_clean <- pbc[!is.na(pbc$age)
+                 & !is.na(pbc$edema)
+                 & !is.na(pbc$bili)
+                 & !is.na(pbc$albumin)
                  & !is.na(pbc$protime)
-                 ,]  
+                 ,]
 
 
 #Selecting 75%  from initial population
@@ -308,16 +295,16 @@ pbc.cox <- coxph(Surv(time,status ==2 ) ~age + edema +log(bili) +log(albumin)+lo
 print(summary(pbc.cox))
 
 ```
-##### Predicting hazard ratios on testset 
+##### Predicting hazard ratios on testset
 relative to the sample average for all predictor variables -> these are the betas
 ```{r}
-coxpredicted_trainpbc <- predict(pbc.cox,type="lp")  
-coxpredicted_testpbc <- predict(pbc.cox, newdata=testpbc,type="lp") 
+coxpredicted_trainpbc <- predict(pbc.cox,type="lp")
+coxpredicted_testpbc <- predict(pbc.cox, newdata=testpbc,type="lp")
 
 print(head(coxpredicted_testpbc,10))
 ```
-##### Hazard for each subject 
-for day 110, (basehazard*exp(lp))  
+##### Hazard for each subject
+for day 110, (basehazard*exp(lp))
 ```{r}
 
 cox_bazehaz <- basehaz(pbc.cox)
@@ -328,7 +315,7 @@ print(head(cox_predhaz_t110, n=10))
 
 #####Calculate Survival probabilities of subjects in testset
 ```{r}
-Pred_Prob <- predictSurvProb(pbc.cox,newdata=testpbc,times=c(110))  
+Pred_Prob <- predictSurvProb(pbc.cox,newdata=testpbc,times=c(110))
 print(head(Pred_Prob, n=10))
 ```
 
@@ -337,16 +324,16 @@ print(head(Pred_Prob, n=10))
 #####Building the cox model
 ```{r}
 
-train.cox <- coxph(Surv(startdate, date, failure) ~ smart_9_normalized + smart_5_normalized +smart_187_normalized 
+train.cox <- coxph(Surv(startdate, date, failure) ~ smart_9_normalized + smart_5_normalized +smart_187_normalized
                    +smart_188_normalized+smart_197_normalized + smart_198_normalized,
                    data = trainset)
 print(summary(train.cox))
 ```
 
-##### Predicting hazard ratios on testset 
+##### Predicting hazard ratios on testset
 ```{r}
-coxpredicted_train <- predict(train.cox,type="lp")  
-coxpredicted_test <- predict(train.cox, newdata=testset,type="lp") 
+coxpredicted_train <- predict(train.cox,type="lp")
+coxpredicted_test <- predict(train.cox, newdata=testset,type="lp")
 #print(head(coxpredicted_test,10))
 ```
 
@@ -367,7 +354,6 @@ pbc$protime[which(is.na(pbc$protime))] <- 0.1
 
 ###2.2.2 Building the ATF Model
 ```{r}
-##Modelling ATF Model
 atf_model_weibull <- survreg(Surv(pbc$time, pbc$status == 2) ~ pbc$age + pbc$edema + log(pbc$bili) + log(pbc$albumin) + log(pbc$protime), dist='weibull')
 summary(atf_model_weibull)
 
@@ -378,8 +364,8 @@ atf_model_log <- survreg(Surv(pbc$time, pbc$status == 2) ~ pbc$age + pbc$edema +
 summary(atf_model_log)
 ```
 
-```{r}
 ####2.2.3 Receive AUC and ROC plot for all ATF models
+```{r}
 par(mfrow = c(2, 2))
 pred_atf <- prediction(predict(atf_model_weibull), pbc$status)
 perf_atf <- performance(pred_atf,"tpr","fpr")
@@ -433,7 +419,7 @@ gbmpbc = gbm(pbc.cox,
 
 print(summary(gbmpbc))
 ```
-#### Predicting hazard ratios on testset 
+#### Predicting hazard ratios on testset
 ```{r}
 
 gbmtrainpbc = predict(object = gbmpbc,
@@ -463,7 +449,7 @@ gbm does not support intervall partitioned data. therefore  we look at the full 
 
 #### Building the model
 ```{r}
-train.coxgbm <- coxph(Surv( date, failure) ~ smart_9_normalized + smart_5_normalized +smart_187_normalized 
+train.coxgbm <- coxph(Surv( date, failure) ~ smart_9_normalized + smart_5_normalized +smart_187_normalized
                       +smart_188_normalized+smart_197_normalized + smart_198_normalized,
                       data = trainset)
 
@@ -478,7 +464,7 @@ gbmhdd = gbm(train.coxgbm,
 #print(summary(gbmhdd))
 ```
 
-#### Predicting hazard ratios on testset 
+#### Predicting hazard ratios on testset
 ```{r}
 gbmtrainhdd = predict(object = gbmhdd,
                       newdata = trainset,
@@ -508,10 +494,9 @@ if(CI_gbmhdd<=0.5){
 
 
 
-#3. Benchmark and Prediction 
-##3.1 How to analyze and access a single subject
+#3. Benchmark and Prediction
+##3.1 How to analyze and access a single subject to predict the odds of its individual survival
 ```{r}
-## Accessing the odds of a single person/data point in the data set to predict its individual survival:
 data(pbc)
 pbc$protime[which(is.na(pbc$protime))] <- 0.1
 cox_model <- coxph(Surv(time, status == 2) ~ age + edema + log(bili) + log(albumin) + log(protime), data=pbc)
@@ -524,24 +509,20 @@ plot(curves[10], xlab = "Days", ylab="Survival Probability")
 plot(curves[100], xlab = "Days", ylab="Survival Probability")
 plot(curves[200], xlab = "Days", ylab="Survival Probability")
 ```
-```{r}
+
 ## To add entirely new data and see its performance, we have to enrich X
+```{r}
 ## curves <- survfit(cox_model, newdata = X)
 plot(survfit(cox_model, newdata=data.frame(age=20,edema=2.0,bili=2.6,albumin=1.3,protime=3)),
 xlab = "Days", ylab="Survival")
 ```
-##3.2. Predicting the future outlook
-The cumulative incidence curve is an alternative to the Kaplan-Meier for competing risks data.  
-A Kaplan-Meier estimate, treating death due to other causes as censored, gives a 12 year cumulate rate of 10%  
-for the 424 patients of PBC. The CuIn estimate, on the other hand, estimates the total number of conversions  
-that will actually occur. Because the population is older, this is smaller than the KM,  
-7% at 12 years for PBC's data. If there were no censoring, then CuIn(t) could very simply be computed as  
-total number of patients with progression by time t divided by the sample size n.  
-```{r}
 
+##3.2. Predicting the future outlook
+The cumulative incidence curve is an alternative to the Kaplan-Meier for competing risks data.
+A Kaplan-Meier estimate, treating death due to other causes as censored, gives a 12 year cumulate rate of 10% for the 424 patients of PBC. The CuIn estimate, on the other hand, estimates the total number of conversions that will actually occur. Because the population is older, this is smaller than the KM, 7% at 12 years for PBC's data. If there were no censoring, then Concordance Index (t) could very simply be computed as total number of patients with progression by time t divided by the sample size n.
+```{r}
 par(mfrow = c(1, 1))
 fitKM <- survfit(Surv(time, status==1) ~1, data=pbc)
-
 fitCI <- survfit(Surv(time, status, type="mstate") ~1,
 data=pbc)
 
@@ -553,35 +534,38 @@ conf.int=FALSE)
 text(500, .4, "Competing risk: death", col=3)
 text(500, .15,"Competing risk: progression", col=2)
 text(500, .30,"Kaplan Meier: prog")
-
 ```
+
 ##3.3 Benchmarking Methods
 ###3.3.1 ROC - Receiver operating characteristic
-```{r}
+```{r include = FALSE}
 ## First, change status to be binary (1 alive, but liver transplantation, 0 is alive, 2 is dead)
 pbc$status[which(pbc$status == 1)] <- 0
 pbc$status[which(pbc$status == 2)] <- 1
+```
 
 ## Generate predictions of cox_model and performance variable and plot the ROC
+```{r}
 pred <- prediction(predict(cox_model), pbc$status)
 perf <- performance(pred,"tpr","fpr")
 plot(perf)
 abline(a=0, b= 1)
 ```
-Sensitivity: Probability that a person with the disease will have a positive test result.    
-Specificity: Probability that a person without the disease will have a negative test result.  
+
+Sensitivity: Probability that a person with the disease will have a positive test result.
+Specificity: Probability that a person without the disease will have a negative test result.
+
 At every cutoff, the TPR and FPR are calculated and plotted. The smoother the graph, the more cutoffs the predictions have.
-We also plotted a 45-degree line, which represents, on average, the performance of a Uniform(0, 1) random variable.
-The further away (towards (0,1) from the diagonal line, the better.
-Overall, we see that we see gains in sensitivity (true positive rate, (> 80%)), trading off a false positive rate (1- specificity),
-up until about 25% FPR. After an FPR of 25%, we don't see significant gains in TPR for a tradeoff of increased FPR.
+
+We also plotted a 45-degree line, which represents, on average, the performance of a Uniform(0, 1) random variable. The further away (towards (0,1) from the diagonal line, the better. Overall, we see that we see gains in sensitivity (true positive rate, (> 80%)), trading off a false positive rate (1- specificity), up until about 25% FPR. After an FPR of 25%, we don't see significant gains in TPR for a tradeoff of increased FPR.
 
 ###3.3.2 AUC - Area under the curve
 ```{r}
-## Receive the AUC
 auc.perf = performance(pred, measure = "auc")
 auc.perf@y.values
 ```
+
+
 ##3.4 Benchmark the models
 Training a data set
 ```{r include = FALSE}
@@ -595,7 +579,7 @@ pbc_clean <- pbc[!is.na(pbc$age)
 ,]
 ```
 
-Selecting 33%, 66% and 100%  from initial population
+###Selecting 33%, 66% and 100%  from initial population
 ```{r include = FALSE}
 samplepbc <- sample.int(n = NROW(pbc_clean), size = floor(.33*NROW(pbc_clean)), replace = F)
 trainpbc_1_3 <- pbc_clean[samplepbc,]
@@ -606,15 +590,14 @@ testpbc_1_3  <- pbc_clean[-samplepbc,]
 ```
 
 
-Building the trained proportional hazard cox models
+###Building the trained proportional hazard cox models
 ```{r include = FALSE}
 pbc.cox_1_3 <- coxph(Surv(time,status ==2 ) ~age + edema +log(bili) +log(albumin)+log(protime), data = trainpbc_1_3)
 pbc.cox_2_3 <- coxph(Surv(time,status ==2 ) ~age + edema +log(bili) +log(albumin)+log(protime), data = trainpbc_2_3)
 pbc.cox_3_3 <- coxph(Surv(time,status ==2 ) ~age + edema +log(bili) +log(albumin)+log(protime), data = pbc_clean)
-
 ```
 
-Building a gradient boosting model from the above mentioned cox model
+###Building a gradient boosting model from the above mentioned cox model
 ```{r include = FALSE}
 gbmpbc_1_3 = gbm(pbc.cox_1_3,
 data = trainpbc_1_3,
@@ -638,7 +621,7 @@ shrinkage = 0.02,
 n.minobsinnode = 4)
 ```
 
-Modelling the ATF models
+###Modelling the ATF models
 ```{r include = FALSE}
 
 atf_model_weibull_1_3 <- survreg(Surv(time, status == 2) ~ age + edema +log(bili) +log(albumin)+log(protime), dist='weibull', data = trainpbc_1_3)
@@ -656,8 +639,7 @@ atf_model_log_3_3 <- survreg(Surv(time, status == 2) ~ age + edema +log(bili) +l
 ```
 
 ##3.5 Receive AUCs for all models
-
-First, generate a binary variable again
+###First, generate a binary variable again
 ```{r include = FALSE}
 trainpbc_1_3$status[which(trainpbc_1_3$status == 1)] <- 0
 trainpbc_1_3$status[which(trainpbc_1_3$status == 2)] <- 1
@@ -667,8 +649,7 @@ pbc_clean$status[which(pbc_clean$status == 1)] <- 0
 pbc_clean$status[which(pbc_clean$status == 2)] <- 1
 ```
 
-
-Now generate predictions on all models
+###Now generate predictions on all models
 ```{r include = FALSE}
 pred_coxph_1_3 <- prediction(predict(pbc.cox_1_3), trainpbc_1_3$status)
 pred_coxph_2_3 <- prediction(predict(pbc.cox_2_3), trainpbc_2_3$status)
@@ -700,8 +681,7 @@ pred_atf_model_log_2_3 <- prediction(predict(atf_model_log_2_3), trainpbc_2_3$st
 pred_atf_model_log_3_3 <- prediction(predict(atf_model_log_3_3), pbc_clean$status)
 ```
 
-
-Now receive the AUC values for each model
+###Now receive the AUC values for each model
 ```{r include = FALSE}
 auc.perf_coxph_1_3 = performance(pred_coxph_1_3, measure = "auc")
 auc.perf_coxph_2_3 = performance(pred_coxph_2_3, measure = "auc")
@@ -722,7 +702,6 @@ auc.perf_atf_model_exponential_3_3 = performance(pred_atf_model_exponential_3_3,
 auc.perf_atf_model_log_1_3 = performance(pred_atf_model_log_1_3, measure = "auc")
 auc.perf_atf_model_log_2_3 = performance(pred_atf_model_log_2_3, measure = "auc")
 auc.perf_atf_model_log_3_3 = performance(pred_atf_model_log_3_3, measure = "auc")
-
 ```
 
 ##3.7 Concordance Index
@@ -736,15 +715,14 @@ CI is the fraction of correctly ordered pairs of subjects compared to all pairs 
 
 For formula see blackboard.
 
-### CI for COX PH HDD Set
-
-Calculating Concordance Index to assess results of prediction
+###CI for COX PH HDD Set
+###Calculating Concordance Index to assess results of prediction
 ```{r}
 # creating survival objects as response variables
-Survresptrain <- Surv(trainset$startdate,trainset$date, trainset$failure  ) 
-Survresptest <- Surv(testset$startdate,testset$date, testset$failure)     
+Survresptrain <- Surv(trainset$startdate,trainset$date, trainset$failure  )
+Survresptest <- Surv(testset$startdate,testset$date, testset$failure)
 # we don't need baseline hazards to measure the ranking since every item is affected by the bh in the same ways
- # only the relative hazard is of interest here                                                                         
+ # only the relative hazard is of interest here
 
 
 CI_cox <- BeggC(Survresptrain, Survresptest, coxpredicted_train, coxpredicted_test)
@@ -752,11 +730,10 @@ if(CI_cox<=0.5){
   CI_cox =1-CI_cox
 }
 ```
-### CI overview
 
-
+###CI overview
 ```{r}
-resultsdf <-  matrix( nrow=2, ncol=2) 
+resultsdf <-  matrix( nrow=2, ncol=2)
 resultsdf <- as.data.frame(resultsdf)
 colnames(resultsdf) <- c("PBC-Set","HDD-Set")
 rownames(resultsdf) <- c("CoxPH","GBMCox")
@@ -774,14 +751,16 @@ CI Could also be used to learn a GBM Model (GBMCI)
 Model tries to rank subjects by survival times so that CI becomes optimal
 
 
-#4. Conclusion and Outlook
-Table AUC and CI for all models
+##3.6 Final Benchmarking
+###Generate a table of AUC and CI values for all models
 ```{r}
 table_benchmark <- read.csv("benchmark.csv", fill = TRUE, header = TRUE, sep = ";")
 print(table_benchmark)
 ```
 
-##3.6 Final Benchmarking and Future Outlook
+
+
+##4 Evaluation and Future Outlook
 It can happen that we have different costs for false negative and false positive
 The output from opt.cut and a performance object with measure cost are NOT equivalent if false positives and false negatives
 are not weighted equally. The cost.fn and cost.fp arguments can be passed to performance, corresponding to the cost of a false negative and false positive, respectively (This is minimize cost criterion).
@@ -791,15 +770,13 @@ cost.perf = performance(pred, "cost", cost.fp = 2, cost.fn = 1)
 pred@cutoffs[[1]][which.min(cost.perf@y.values[[1]])]
 ```
 
-Plotting the cost line, once weighted and once by the ROCR standard cost.
+###Plotting the cost line, once weighted and once by the ROCR standard cost.
 ```{r}
 plot(performance(pred,"cost"))
 plot(cost.perf)
-
 ```
-If we want to only accept a for of x percentage points, like 0.1 as false correct prediction, we need to first
-define a function pROC and then plot the graph.
-As result, if we can only accept a FPR of 10%, the model is only giving 50% sensitivity (TPR) at 10% FPR (1-specificity).
+If we want to only accept a for of x percentage points, like 0.1 as false correct prediction, we need to first define a function pROC and then plot the graph. As result, if we can only accept a FPR of 10%, the model is only giving 50% sensitivity (TPR) at 10% FPR (1-specificity).
+
 ```{r}
 pROC = function(pred, fpr.stop){
     perf <- performance(pred,"tpr","fpr")
@@ -811,21 +788,21 @@ pROC = function(pred, fpr.stop){
     return(perf)
 }
 ```
-Plotting the new line
-```{r}
 
+###Plotting the new line
+```{r}
 proc.perf = pROC(pred, fpr.stop=0.1)
 plot(proc.perf)
 abline(a=0, b= 1)
 ```
 
-Address now for evaluation the partial AUC, this value can range from 0 to infinity
+###Address now for evaluation the partial AUC, this value can range from 0 to infinity
 ```{r}
 pauc.perf = performance(pred, measure = "auc", fpr.stop=0.1)
 pauc.perf@y.values
 ```
 
-Divide pAUC by fpr.stop to receive a standardized result form 0 to 1 like AUC
+###Divide pAUC by fpr.stop to receive a standardized result form 0 to 1 like AUC
 ```{r}
 pauc.perf@y.values = lapply(pauc.perf@y.values, function(x) x / 0.1)
 pauc.perf@y.values
@@ -833,7 +810,11 @@ pauc.perf@y.values
 
 
 
-Backup - FOR Concordance Indices
+
+
+
+
+###Backup - FOR Concordance Indices
 ```{r}
 ## gbmpbc_1_3
 gbmtrainpbc = predict(object = gbmpbc_1_3,
