@@ -3,9 +3,11 @@
 # Created by: areiche
 # Created on: 24.01.2018
 
+##Benchmarking
 ##                                  How to ANALYSE and ACCESS a single subject
 ## Accessing the odds of a single person/data point in the data set to predict its individual survival:
 data(pbc)
+pbc$protime[which(is.na(pbc$protime))] <- 0.1
 cox_model <- coxph(Surv(time, status == 2) ~ age + edema + log(bili) + log(albumin) + log(protime), data=pbc)
 summary(cox_model)
 curves <- survfit(cox_model, pbc)
@@ -19,7 +21,7 @@ plot(curves[200], xlab = "Days", ylab="Survival Probability")
 
 ## To add entirely new data and see its performance, we have to enrich X
 ## curves <- survfit(cox_model, newdata = X)
-plot(survfit(cox_model2, newdata=data.frame(age=60,edema=2.0,bili=2.6,albumin=1.3,protime=3)),
+plot(survfit(cox_model, newdata=data.frame(age=60,edema=2.0,bili=2.6,albumin=1.3,protime=3)),
 xlab = "Days", ylab="Survival")
 
 
