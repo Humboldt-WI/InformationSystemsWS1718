@@ -15,6 +15,7 @@ if(!require("KMsurv")) install.packages("KMsurv"); library("KMsurv")
 if(!require("gbm")) install.packages("gbm"); library("gbm")
 if(!require("xtable")) install.packages("xtable"); library("xtable")
 if(!require("SurvRegCensCov")) install.packages("SurvRegCensCov"); library("SurvRegCensCov")
+if(!require("survAUC")) install.packages("survAUC"); library("survAUC")
 
 ```
 #1. What ist Survival Analysis?
@@ -131,8 +132,10 @@ print(c[c$serial_number %in% c("MJ0351YNG9Z0XA","W300K6X5"), ])
 ##2.1 Kaplan Meyer
 ###2.1.1. Preparations
 #### Create a survival element by Surv function
-```{r }
+#### Load the package data
 
+```{r }
+data(pbc, package="survival")
 days_of_survival <- with (pbc, Surv(pbc$time, pbc$status==2))
 print(days_of_survival)
 ```
@@ -223,7 +226,7 @@ survdiff(Surv(pbc$time, pbc$status==2)~pbc$hepato)
 
 ####Using Survminer package, simple curve:
 ```{r}
-ggsurvplot(model_fit)
+ggsurvplot(model_fit_trt)
 ```
 
 
@@ -231,7 +234,7 @@ ggsurvplot(model_fit)
 
 ####Curve containing risk table:
 ```{r}
-ggsurv <- ggsurvplot(model_fit, title = "Survival Time of \n Biliary Cirrhosis Patients \n",
+ggsurv <- ggsurvplot(model_fit_trt, title = "Survival Time of \n Biliary Cirrhosis Patients \n",
 legend.title = "Treatment",
 legend.labs = c("One", "Two"),
 xlab = "\n Survival Time (days) ",
@@ -376,28 +379,6 @@ summary(atf_model_log)
 ```
 
 ```{r}
-#Usage of SurvRegCensCov for Weibull ATF
-library(SurvRegCensCov)
-data(larynx)
-WeibullReg(Surv(time, death) ~ factor(stage) + age, data=larynx)
-WeibullDiag(Surv(time, death) ~ factor(stage), data = larynx,
-labels=c("Stage I", "Stage II", "Stage III", "Stage IV"))
-```
-
-```{r}
-##Compare output with s1 summary. The differences is that WeibullReg contains already the hazard ratios
-s3 <- WeibullReg(Surv(futime, fustat)~1  , ovarian)
-print(s3)
-```
-
-
-```{r}
-##Produce the diagnostic Plot, plots log Time versus the log of the estimated cumulative hazard estimate.
-##If the Weibull model has adequate fit, then the plots for each of the covariates should be roughly linear
-##and parallel.
-WeibullDiag(Surv(futime, fustat)~factor(rx) , ovarian,
-labels=c("Stage I", "Stage II"))
-```
 
 
 
@@ -537,6 +518,7 @@ if(CI_gbmhdd<=0.5){
 ```{r}
 ## Accessing the odds of a single person/data point in the data set to predict its individual survival:
 data(pbc)
+pbc$protime[which(is.na(pbc$protime))] <- 0.1
 cox_model <- coxph(Surv(time, status == 2) ~ age + edema + log(bili) + log(albumin) + log(protime), data=pbc)
 summary(cox_model)
 curves <- survfit(cox_model, pbc)
@@ -551,7 +533,7 @@ plot(curves[200], xlab = "Days", ylab="Survival Probability")
 ```{r}
 ## To add entirely new data and see its performance, we have to enrich X
 ## curves <- survfit(cox_model, newdata = X)
-plot(survfit(cox_model2, newdata=data.frame(age=60,edema=2.0,bili=2.6,albumin=1.3,protime=3)),
+plot(survfit(cox_model, newdata=data.frame(age=60,edema=2.0,bili=2.6,albumin=1.3,protime=3)),
 xlab = "Days", ylab="Survival")
 ```
 ##3.2. Predicting the future outlook
@@ -749,59 +731,6 @@ auc.perf_atf_model_log_3_3 = performance(pred_atf_model_log_3_3, measure = "auc"
 
 ```
 
-##3.6 Final Benchmarking and Future Outlook
-It can happen that we have different costs for false negative and false positive
-The output from opt.cut and a performance object with measure cost are NOT equivalent if false positives and false negatives
-are not weighted equally. The cost.fn and cost.fp arguments can be passed to performance, corresponding to the cost of a false negative and false positive, respectively (This is minimize cost criterion).
-
-```{r}
-cost.perf = performance(pred, "cost", cost.fp = 2, cost.fn = 1)
-pred@cutoffs[[1]][which.min(cost.perf@y.values[[1]])]
-```
-
-Plotting the cost line, once weighted and once by the ROCR standard cost.
-```{r}
-plot(performance(pred,"cost"))
-plot(cost.perf)
-
-```
-If we want to only accept a for of x percentage points, like 0.1 as false correct prediction, we need to first
-define a function pROC and then plot the graph.
-As result, if we can only accept a FPR of 10%, the model is only giving 50% sensitivity (TPR) at 10% FPR (1-specificity).
-```{r}
-pROC = function(pred, fpr.stop){
-    perf <- performance(pred,"tpr","fpr")
-    for (iperf in seq_along(perf@x.values)){
-        ind = which(perf@x.values[[iperf]] <= fpr.stop)
-        perf@y.values[[iperf]] = perf@y.values[[iperf]][ind]
-        perf@x.values[[iperf]] = perf@x.values[[iperf]][ind]
-    }
-    return(perf)
-}
-```
-Plotting the new line
-```{r}
-
-proc.perf = pROC(pred, fpr.stop=0.1)
-plot(proc.perf)
-abline(a=0, b= 1)
-```
-
-Address now for evaluation the partial AUC, this value can range from 0 to infinity
-```{r}
-pauc.perf = performance(pred, measure = "auc", fpr.stop=0.1)
-pauc.perf@y.values
-```
-
-
-Divide pAUC by fpr.stop to receive a standardized result form 0 to 1 like AUC
-```{r}
-pauc.perf@y.values = lapply(pauc.perf@y.values, function(x) x / 0.1)
-pauc.perf@y.values
-```
-
-
-
 ##3.7 Concordance Index
 The output of the cox function are relative hazards.
 Lower hazard in general means longer survival time and vice versa.
@@ -852,3 +781,294 @@ Model tries to rank subjects by survival times so that CI becomes optimal
 
 
 #4. Conclusion and Outlook
+Table AUC and CI for all models
+```{r}
+table_benchmark <- read.csv("benchmark.csv", fill = TRUE, header = TRUE, sep = ";")
+print(table_benchmark)
+```
+
+##3.6 Final Benchmarking and Future Outlook
+It can happen that we have different costs for false negative and false positive
+The output from opt.cut and a performance object with measure cost are NOT equivalent if false positives and false negatives
+are not weighted equally. The cost.fn and cost.fp arguments can be passed to performance, corresponding to the cost of a false negative and false positive, respectively (This is minimize cost criterion).
+
+```{r}
+cost.perf = performance(pred, "cost", cost.fp = 2, cost.fn = 1)
+pred@cutoffs[[1]][which.min(cost.perf@y.values[[1]])]
+```
+
+Plotting the cost line, once weighted and once by the ROCR standard cost.
+```{r}
+plot(performance(pred,"cost"))
+plot(cost.perf)
+
+```
+If we want to only accept a for of x percentage points, like 0.1 as false correct prediction, we need to first
+define a function pROC and then plot the graph.
+As result, if we can only accept a FPR of 10%, the model is only giving 50% sensitivity (TPR) at 10% FPR (1-specificity).
+```{r}
+pROC = function(pred, fpr.stop){
+    perf <- performance(pred,"tpr","fpr")
+    for (iperf in seq_along(perf@x.values)){
+        ind = which(perf@x.values[[iperf]] <= fpr.stop)
+        perf@y.values[[iperf]] = perf@y.values[[iperf]][ind]
+        perf@x.values[[iperf]] = perf@x.values[[iperf]][ind]
+    }
+    return(perf)
+}
+```
+Plotting the new line
+```{r}
+
+proc.perf = pROC(pred, fpr.stop=0.1)
+plot(proc.perf)
+abline(a=0, b= 1)
+```
+
+Address now for evaluation the partial AUC, this value can range from 0 to infinity
+```{r}
+pauc.perf = performance(pred, measure = "auc", fpr.stop=0.1)
+pauc.perf@y.values
+```
+
+Divide pAUC by fpr.stop to receive a standardized result form 0 to 1 like AUC
+```{r}
+pauc.perf@y.values = lapply(pauc.perf@y.values, function(x) x / 0.1)
+pauc.perf@y.values
+```
+
+
+
+Backup - FOR Concordance Indices
+```{r}
+## gbmpbc_1_3
+gbmtrainpbc = predict(object = gbmpbc_1_3,
+newdata = trainpbc_1_3,
+n.trees = 1500,
+type = "response")
+
+
+gbmtestpbc = predict(object = gbmpbc_1_3,
+newdata = testpbc_2_3,
+n.trees = 1500,
+type = "response")
+
+
+Survresptrainpbc <- Surv(trainpbc_1_3$time,trainpbc_1_3$status==2)
+Survresptestpbc <- Surv(testpbc_2_3$time,testpbc_2_3$status == 2)
+CI_gbmpbc_1_3 <- BeggC(Survresptrainpbc, Survresptestpbc, gbmtrainpbc, gbmtestpbc)
+if(CI_gbmpbc_1_3<=0.5){
+    CI_gbmpbc_1_3 =1-CI_gbmpbc_1_3
+}
+CI_gbmpbc_1_3
+
+## gbmpbc_2_3
+gbmtrainpbc = predict(object = gbmpbc_2_3,
+newdata = trainpbc_2_3,
+n.trees = 1500,
+type = "response")
+
+
+gbmtestpbc = predict(object = gbmpbc_2_3,
+newdata = testpbc_1_3,
+n.trees = 1500,
+type = "response")
+
+
+Survresptrainpbc <- Surv(trainpbc_2_3$time,trainpbc_2_3$status==2)
+Survresptestpbc <- Surv(testpbc_1_3$time,testpbc_1_3$status == 2)
+CI_gbmpbc_2_3 <- BeggC(Survresptrainpbc, Survresptestpbc, gbmtrainpbc, gbmtestpbc)
+if(CI_gbmpbc_2_3<=0.5){
+    CI_gbmpbc_2_3 =1-CI_gbmpbc_2_3
+}
+CI_gbmpbc_2_3
+
+## atf_model_weibull_1_3
+trainpbc = predict(object = atf_model_weibull_1_3,
+newdata = trainpbc_1_3,
+n.trees = 1500,
+type = "response")
+
+
+testpbc = predict(object = atf_model_weibull_1_3,
+newdata = testpbc_2_3,
+n.trees = 1500,
+type = "response")
+
+
+Survresptrainpbc <- Surv(trainpbc_1_3$time,trainpbc_1_3$status==2)
+Survresptestpbc <- Surv(testpbc_2_3$time,testpbc_2_3$status == 2)
+CI_atf_model_weibull_1_3 <- BeggC(Survresptrainpbc, Survresptestpbc, trainpbc, testpbc)
+if(CI_atf_model_weibull_1_3<=0.5){
+    CI_atf_model_weibull_1_3 =1-CI_atf_model_weibull_1_3
+}
+CI_atf_model_weibull_1_3
+
+## atf_model_weibull_2_3
+trainpbc = predict(object = atf_model_weibull_2_3,
+newdata = trainpbc_2_3,
+n.trees = 1500,
+type = "response")
+
+
+testpbc = predict(object = atf_model_weibull_2_3,
+newdata = testpbc_1_3,
+n.trees = 1500,
+type = "response")
+
+
+Survresptrainpbc <- Surv(trainpbc_2_3$time,trainpbc_2_3$status==2)
+Survresptestpbc <- Surv(testpbc_1_3$time,testpbc_1_3$status == 2)
+CI_atf_model_weibull_2_3 <- BeggC(Survresptrainpbc, Survresptestpbc, trainpbc, testpbc)
+if(CI_atf_model_weibull_2_3<=0.5){
+    CI_atf_model_weibull_2_3 =1-CI_atf_model_weibull_2_3
+}
+CI_atf_model_weibull_2_3
+
+## atf_model_weibull_3_3
+trainpbc = predict(object = atf_model_weibull_3_3,
+newdata = pbc_clean,
+n.trees = 1500,
+type = "response")
+
+
+testpbc = predict(object = atf_model_weibull_3_3,
+newdata = testpbc_1_3,
+n.trees = 1500,
+type = "response")
+
+
+Survresptrainpbc <- Surv(pbc_clean$time,pbc_clean$status==2)
+Survresptestpbc <- Surv(testpbc_1_3$time,testpbc_1_3$status == 2)
+CI_atf_model_weibull_3_3 <- BeggC(Survresptrainpbc, Survresptestpbc, trainpbc, testpbc)
+if(CI_atf_model_weibull_3_3<=0.5){
+    CI_atf_model_weibull_3_3 =1-CI_atf_model_weibull_3_3
+}
+CI_atf_model_weibull_3_3
+
+## atf_model_exponential_1_3
+trainpbc = predict(object = atf_model_exponential_1_3,
+newdata = trainpbc_1_3,
+n.trees = 1500,
+type = "response")
+
+
+testpbc = predict(object = atf_model_exponential_1_3,
+newdata = testpbc_2_3,
+n.trees = 1500,
+type = "response")
+
+
+Survresptrainpbc <- Surv(trainpbc_1_3$time,trainpbc_1_3$status==2)
+Survresptestpbc <- Surv(testpbc_2_3$time,testpbc_2_3$status == 2)
+CI_atf_model_exponential_1_3 <- BeggC(Survresptrainpbc, Survresptestpbc, trainpbc, testpbc)
+if(CI_atf_model_exponential_1_3<=0.5){
+    CI_atf_model_exponential_1_3 =1-CI_atf_model_exponential_1_3
+}
+CI_atf_model_exponential_1_3
+
+## atf_model_exponential_2_3
+trainpbc = predict(object = atf_model_exponential_2_3,
+newdata = trainpbc_2_3,
+n.trees = 1500,
+type = "response")
+
+
+testpbc = predict(object = atf_model_exponential_2_3,
+newdata = testpbc_1_3,
+n.trees = 1500,
+type = "response")
+
+
+Survresptrainpbc <- Surv(trainpbc_2_3$time,trainpbc_2_3$status==2)
+Survresptestpbc <- Surv(testpbc_1_3$time,testpbc_1_3$status == 2)
+CI_atf_model_exponential_2_3 <- BeggC(Survresptrainpbc, Survresptestpbc, trainpbc, testpbc)
+if(CI_atf_model_exponential_2_3<=0.5){
+    CI_atf_model_exponential_2_3 =1-CI_atf_model_exponential_2_3
+}
+CI_atf_model_exponential_2_3
+
+## atf_model_exponential_3_3
+trainpbc = predict(object = atf_model_exponential_3_3,
+newdata = pbc_clean,
+n.trees = 1500,
+type = "response")
+
+
+testpbc = predict(object = atf_model_exponential_3_3,
+newdata = testpbc_1_3,
+n.trees = 1500,
+type = "response")
+
+
+Survresptrainpbc <- Surv(pbc_clean$time,pbc_clean$status==2)
+Survresptestpbc <- Surv(testpbc_1_3$time,testpbc_1_3$status == 2)
+CI_atf_model_exponential_3_3 <- BeggC(Survresptrainpbc, Survresptestpbc, trainpbc, testpbc)
+if(CI_atf_model_exponential_3_3<=0.5){
+    CI_atf_model_exponential_3_3 =1-CI_atf_model_exponential_3_3
+}
+CI_atf_model_exponential_3_3
+
+## atf_model_log_1_3
+trainpbc = predict(object = atf_model_log_1_3,
+newdata = trainpbc_1_3,
+n.trees = 1500,
+type = "response")
+
+
+testpbc = predict(object = atf_model_log_1_3,
+newdata = testpbc_2_3,
+n.trees = 1500,
+type = "response")
+
+
+Survresptrainpbc <- Surv(trainpbc_1_3$time,trainpbc_1_3$status==2)
+Survresptestpbc <- Surv(testpbc_2_3$time,testpbc_2_3$status == 2)
+CI_atf_model_log_1_3 <- BeggC(Survresptrainpbc, Survresptestpbc, trainpbc, testpbc)
+if(CI_atf_model_log_1_3<=0.5){
+    CI_atf_model_log_1_3 =1-CI_atf_model_log_1_3
+}
+CI_atf_model_log_1_3
+
+## atf_model_log_2_3
+trainpbc = predict(object = atf_model_log_2_3,
+newdata = trainpbc_2_3,
+n.trees = 1500,
+type = "response")
+
+
+testpbc = predict(object = atf_model_log_2_3,
+newdata = testpbc_1_3,
+n.trees = 1500,
+type = "response")
+
+
+Survresptrainpbc <- Surv(trainpbc_2_3$time,trainpbc_2_3$status==2)
+Survresptestpbc <- Surv(testpbc_1_3$time,testpbc_1_3$status == 2)
+CI_atf_model_log_2_3 <- BeggC(Survresptrainpbc, Survresptestpbc, trainpbc, testpbc)
+if(CI_atf_model_log_2_3<=0.5){
+    CI_atf_model_log_2_3 =1-CI_atf_model_log_2_3
+}
+CI_atf_model_log_2_3
+
+## atf_model_log_3_3
+trainpbc = predict(object = atf_model_log_3_3,
+newdata = pbc_clean,
+n.trees = 1500,
+type = "response")
+
+
+testpbc = predict(object = atf_model_log_3_3,
+newdata = testpbc_1_3,
+n.trees = 1500,
+type = "response")
+
+
+Survresptrainpbc <- Surv(pbc_clean$time,pbc_clean$status==2)
+Survresptestpbc <- Surv(testpbc_1_3$time,testpbc_1_3$status == 2)
+CI_atf_model_log_3_3 <- BeggC(Survresptrainpbc, Survresptestpbc, trainpbc, testpbc)
+if(CI_atf_model_log_3_3<=0.5){
+    CI_atf_model_log_3_3 =1-CI_atf_model_log_3_3
+}
+CI_atf_model_log_3_3
+```
