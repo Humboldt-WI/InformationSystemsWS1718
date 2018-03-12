@@ -1,0 +1,37 @@
+Codebook for the file fb_election_data.csv
+
+General Info:
+
+This dataset contains facebook data from candidates that ran for a seat in the German Parliament in the 2017 election.
+Due to the restriction of Facebook's API only public pages were include, i.e no public profiles.
+
+Variables:
+
+  id: unique post id that is built out of the page_id (var from_id) and an unique identifier, string
+  likes_count: value with the amount of likes the post has received, numeric
+  from_id: unique page_id, string
+  from_name: name of the page, string
+  message: text that was published, string
+  created_time: time of publication, format: YYYY-MM-DDTHH:MM:SS+0000
+  type: post type, string (e.g. photo)
+  link: link to the photo, video that was posted
+  story: kind of status update (e.g Bernd Liebhardt added 2 new photos)
+  comments_count: amount of comments on the post
+  shares_count: number of shares
+  reactions:
+    love_count: number of people that used the love reaction
+    haha_count: number of people that used the haha reaction
+    wow_count: number of people that used the wow reaction
+    sad_count: number of people that used the sad reaction
+  RFBL: position on the candidate list on federal level (Liste vom Bundeswahlleiter)
+  Name_1: candidate name
+  Partei_NR: number of party (e.g. CDU=1, SPD=2, ...)
+  Partei_ABK: abbreviation of Party (CDU, SPD, ...)
+  Geschlecht: gender of candidate
+  Jahrgang: birth year of candidate
+  LAND_NR: number indicates in which federal state the candidate ran
+  Kandidatur: numeric value (1=direct candidate only, 2=only party ticket (Liste), 3=both)
+  Listenplatz: number on party ticket (independent of winning his district) of his party in his federal state
+  WKR_NR: Number of district were the candidate was running
+  MdB_2013: 1=If the candidate was a delegate after the election in 2013 and was running again in 2017 
+  MdB_2017: 1=If the candidate is now in parliament.
