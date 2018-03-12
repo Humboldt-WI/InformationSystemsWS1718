@@ -10,15 +10,15 @@ A very common way to accomplish that is by using an API.
 
 As a data scientist, you will need to interact with other professionals that don't have the same expertise that you have when it comes to quantitative models. They will be very interested in the predictions your models are able to deliver, but not so much in the technicalities it involves.
 
-Imagine you work for a fashion online shop and are faced with the task of creating a model to predict which clothes are likely to fit the customer's body. You get as input whole-body pictures of some customers and their their purchase history. You decide to tackle the problem using deep learning and mange to create a very good model. After some discussion, the management level of your company decides that the results are good enough and that they want to offer this new feature on their online shop. The workflow of the app is simple: the customer upload a picture of herself and receives a suggestions stemming from your algorithm.
+Imagine you work for a fashion online shop and are faced with the task of creating a model to predict which clothes are likely to fit the customer's body. You get as input whole-body pictures of some customers and their purchase history. You decide to tackle the problem using deep learning and mange to create a very good model. After some discussion, the management level of your company decides that the results are good enough and that they want to offer this new feature on their online shop. The workflow of the app is simple: the customer uploads a picture of herself and receives a suggestions stemming from your algorithm.
 
-To you, this means the model, which has run so far on your machine, needs to be deployed to a server and be accessible to the whole application. Most likely the frontend part of the online shop will receive the image uploaded by the customer and send its pixels to your model. The frontend developer is not interested in how pixels turns into prediction. She merely wants to send the picture and get back the IDs of the suggested products, so they can be displayed.
+To you, this means the model, which has run so far on your machine, needs to be deployed to a server and be accessible to the whole application. Most likely the frontend part of the online shop will receive the image uploaded by the customer and send its pixels to your model. The frontend developer is not interested in how pixels turn into prediction. She merely wants to send the picture and get back the IDs of the suggested products, so they can be displayed.
 
 Considering everything, you decide to build an API. Here we will walk you through the process of deploying a deep learning model via an API. Instead of customer's pictures, we will use handwritten digits and employ the model to predict what digit it is. And instead of a frontend mobile application, an R session will be querying the API and consuming the predictions.
 
 ## Reproducibility with Conda Environments
 
-It's good practice to create a conda environment to train and later deploy our model. By doing that, a fresh version of Python is installed. It will only have access to the packages you explicitly install while in the environment. This has some advantages:
+It's good practice to create a Conda environment to train and later deploy our model. By doing that, a fresh version of Python is installed. It will only have access to the packages you explicitly install while in the environment. This has some advantages:
 
 - you won't fall into the *gotchas* of depending on a package you have previously installed and have forgotten to install on the server. With a simple command, you can get a snapshot of all the packages used in an environment.
 - your results can easily be shared with and reproduced by other researchers.
@@ -297,7 +297,7 @@ features <- test_filtered %>%
   as.matrix()
 ```
 
-The httr package makes it very simple to send HTTP requests. We wrap the `feature` matrix in a named list under the `input` field, which is the field in the request body our API is expecting to find the data. We use the `POST` function and pass "json" to the `encode` argument. `httr` converts out data automatically from a list to JSON and sends it over to the API.
+The `httr` package makes it very simple to send HTTP requests. We wrap the `feature` matrix in a named list under the `input` field, which is the field in the request body our API is expecting to find the data. We use the `POST` function and pass "json" to the `encode` argument. `httr` converts out data automatically from a list to JSON and sends it over to the API.
 
 The API processes the request and send back a prediction, which is stored in a response object `r`. We can access the response sent by the API by applying the `content` function to it.
 
@@ -349,7 +349,7 @@ df %>%
 #     8   492 
 ```
 
-Three times has our model labeled a `2` as a `3` and twice as a `0`. The plot below shows _how_ the `2`s were misclassified.
+Three times has our model labelled a `2` as a `3` and twice as a `0`. The plot below shows _how_ the `2`s were misclassified.
 
 ``` R
 p <- df %>% 
@@ -371,9 +371,9 @@ p
 
 ## Deploy to Heroku
 
-We are finally ready for the last step: deploy our API on the web so anyone with an internet connection can have access to it.
+We are finally ready for the last step: deploy our API on the web so anyone with an Internet connection can have access to it.
 
-There are many options on the market to accomplish that. We chose to use [Heroku](https://www.heroku.com/) here beacause it is very simple and it allows us to deploy our API for free (at least until it reaches a certain limit of resource consumption).
+There are many options on the market to accomplish that. We chose to use [Heroku](https://www.heroku.com/) here because it is very simple and it allows us to deploy our API for free (at least until it reaches a certain limit of resource consumption).
 
 You will have to create a Heroku account if you still want to follow along. After creating the account, you will be able to log to your Heroku dashboard and from there you can create a new Heroku app. We have named our app `flask-digit-classifier`.
 
@@ -383,7 +383,7 @@ The way the deployment will is the following:
 
 - we will create a git repository in the folder we have our application
 - set an upstream branch a link it to Heroku's CLI
-- commit and push the necessary files to run the app to the upstream branch and let Heroku do the hard lifiting.
+- commit and push the necessary files to run the app to the upstream branch and let Heroku do the hard lifting.
 
 Thus, you will also need to install:
 
@@ -444,10 +444,10 @@ In our case, our app was deployed to `https://flask-digit-classifier.herokuapp.c
 
 ## Shiny App
 
-Whew! We hope you made thus far. As a surprise we have devloped a slightly more sophisticated client for our API. We created a Shiny App to help you visualize the how the model makes its predictons.
+Whew! We hope you made thus far. As a surprise we have developed a slightly more sophisticated client for our API. We created a Shiny App to help you visualize the how the model makes its predictions.
 
 ![shiny-app-digit-recognition](img/shiny-app-digit-recognition.png)
 
 Here you have a link for the [Shiny App](https://denismaciel.shinyapps.io/digit-classification/). And here is the link of our [Flask API](https://flask-digit-classifier.herokuapp.com/home).
 
-The API sending the predictions is exaclty the same one we just built and deployed to Heroku. The Shiny App is deployed on a completely different platform and is communicating with the Flask API over the internet. Quite neat, right?
+The API sending the predictions is exactly the same one we just built and deployed to Heroku. The Shiny App is deployed on a completely different platform and is communicating with the Flask API over the Internet. Quite neat, right?
