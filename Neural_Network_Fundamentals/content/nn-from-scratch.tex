@@ -167,3 +167,106 @@ INSERT PICTURE!!!
     input = np.array(np.asfarray(observation[1:]), ndmin=2).T # save necessary elements in a vertical vector shape.
 \end{lstlisting}
 
+
+\subsection{Fitting the structure of the NN to the Data}
+
+After inspecting the data, we can conclude that the structure in Figure \ref{fig:nn-schema} with 3-5-2 nodes is probably not optimal and therefore should be updated in order to fit the data we have and peculiarities of the classification problem: 
+
+\begin{itemize}
+    \item For each observation we have 784 elements as an input (label element is excluded). Accordingly, instead of 3 input nodes we should better have 784.
+    \item Similarly, as we have 10 different options for the outcome (handwritten numbers are labeled from from 0 to 9) the number of output nodes should be 10 instead of 2. 
+    \item We also change the number of hidden nodes from 5 to 90. Such a number has been assigned based on some proportionality assumptions which will be checked later: 90 is 9 times higher than 10 and approximately 9 times smaller than 784.
+\end{itemize}
+
+As we have new structure of the NN we should reassign the weights - now the size of each weight matrix will increase as we have more nodes in each layer.
+
+\begin{lstlisting}[language=Python]
+    # Determine the new structure of the NN.
+    i_n = 784
+    h_n = 90
+    o_n = 10
+    
+    # Determine the weights.
+    w_i_h = np.random.rand(h_n, i_n)
+    w_h_o = np.random.rand(o_n, h_n)
+\end{lstlisting}
+
+So far we have not used the first element of our observation - the label. It will be necessary to compare the predictions of the NN to the real state of the world and to train the NN to make correct predictions. The target should therefore have the same shape as the output layer of the NN, so that they could be comparable. We can represent the label as a vector of n binary (0 or 1) elements (n corresponds to the number of nodes in the output layer). There should be only one element equal to 1 and the position of this element should correspond to the index number of the label we want to predict.
+
+\begin{lstlisting}[language=Python]
+    # Create target array.
+    target = np.array(np.zeros(o_n), ndmin=2).T
+    # int() method returns an integer object
+    # from any number or string.
+    target[int(observation[0])] = 1 
+
+    # Inspect how the target looks like (remember that the label of observations is 5).
+    target
+
+    # Show the sizes of matrices of weights, input and target vectors.
+    w_i_h.shape, input.shape, w_h_o.shape, target.shape
+\end{lstlisting}
+
+\begin{lstlisting}
+((90, 784), (784, 1), (10, 90), (10, 1))
+\end{lstlisting}
+
+\subsection{Feedforwarding}
+
+Once we have the structure of the NN updated for the specific task of classifying the numbers depicted on the images, we can run our network in order to get the first predictions that will be represented by a vector of 10 elements. This vector in its turn can be compared to the target.
+
+To run the NN, i.e. to feed forward our input data in order to get some predictions, we should follow certain steps:
+
+\begin{enumerate}
+    \item Multiply an input vector by a matrix of weights that connects it with the next layer;
+    \item Transform the result using activation function;
+    \item Use the output obtained in the 2nd step as an input vector for the next layer.
+\end{enumerate}
+
+A sequence of this steps should be repeated n-1 times (where n corresponds to the number of layers). The output of the previous layer will always be the input vector for the next layer. In our case the procedure will happen twice.
+
+In the Figures \ref{fig:multiplication} and \ref{fig:activation}, you can see the procedure necessary to obtain the output of the hidden layer. The result of matrix multiplication here is called Hidden\_Input. Result of the transformation of Hidden\_Input through activation function is called Hidden\_Output.
+
+This output will be used as the input vector that should be multiplied by the next weight matrix and transformed through activation function in order to calculate the final output of the NN. If our NN would have more than one hidden layer, the procedure would be repeated more times.
+
+\begin{figure}[H]
+    \includegraphics[width=\linewidth]{pics/multiplication.png}
+    \caption{\label{fig:multiplication} How Weights Work}
+\end{figure}
+
+\begin{figure}[H]
+    \includegraphics[width=\linewidth]{pics/activation.jpg}
+    \caption{\label{fig:activation} How Activation Works}
+\end{figure}
+
+Below you can see the code implementation of all the steps for all layers of the NN.
+
+\begin{lstlisting}[language=Python]
+    # Calculate the output of hidden and output layers of our NN.
+    # dot() performs matrix multiplication; "h_input" stands for "Hidden_Input".
+    h_input = np.dot(w_i_h, input) 
+    # "Hidden_Output" - result after activation function.
+    h_output = sigmoid(h_input) 
+    # "Output_Input" - input used for the next layer.
+    o_input = np.dot(w_h_o, h_output)
+    # "Output_Output" - final output of the NN.
+    o_output = sigmoid(o_input)
+
+    # Print output to the screen
+    o_output 
+\end{lstlisting}
+
+\begin{lstlisting}
+    array([[ 1.],
+    [ 1.],
+    [ 1.],
+    [ 1.],
+    [ 1.],
+    [ 1.],
+    [ 1.],
+    [ 1.],
+    [ 1.],
+    [ 1.]])
+\end{lstlisting}
+
+\subsection{Good Practices on Data Treatment}
