@@ -1,0 +1,169 @@
+\subsection{Problem Statement}
+
+The best way to understand how neural networks work is to build one yourself from scratch. The understanding becomes even more comprehensive if there is a particular problem that can be solved using NNs. Therefore let's start our work by taking a look at Figure \ref{fig:digit-classification}.
+
+\begin{figure}[H]
+    \includegraphics[width=\linewidth]{pics/problem.png}
+    \caption{\label{fig:digit-classification} Digit Classification Problem}
+\end{figure}
+
+There are handwritten numbers that you want computer to correctly classify. This would be an easy task for a person but at least for a long period of time was an extremely complicated one for a machine. 
+
+Even though the computer is faster than the human brain in numeric computations, the brain outperforms the computer in some other tasks. Many of those tasks are related to the human ability for sentience (which is a concept different from intelligence). The trick is to find a way, so that the computer could apply its numeric computation skills to solve these later tasks (at least to some degree).
+
+The first step would be to limit the scope of the task. In our particular case the broad task of image recognition will be addressed as a classification problem - a task of giving an object a label from a given set of labels.
+
+As we will see during the process of building our own NN, its output is based almost exclusively on application of linear algebra methods. Despite the name (which is sometimes related to the fear of artificial intelligence), neural networks in fact are much more related to statistical methods (like regression analysis or curve fitting) than to the way human brain works ??? [[Stuart Reid, 2014](http://www.turingfinance.com/misconceptions-about-neural-networks/)]. 
+
+NNs are inspired by human brain only to certain extent. For instance the main element that makes them similar is a multilayer net structure of simple elements that are connected in some way, receiving and transmitting information. But the structure of the human brain is much more complicated, besides it is self-organizing and adaptive in contrast to the fixed manually designed architecture of a NN. Hence, there is a good reason to stop being afraid of neural networks and instead to create one ourselves.
+
+\begin{figure}[H]
+    \includegraphics[width=\linewidth]{pics/neurons_net3.png}
+    \caption{\label{fig:real-neurons} Brain Neurons. Source: pixabay.com}
+\end{figure}
+
+
+\subsection{Schematic Representation}
+A complex multilayer structure that all neural networks have in common in a simplified way can be depicted using the following picture.
+
+\begin{figure}[H]
+    \includegraphics[width=\linewidth]{pics/neural_network1.jpg}
+    \caption{\label{fig:nn-schema} Neural Network Schema}
+\end{figure}
+
+All we need in order to implement such a structure is base Python and numpy, a library for numerical computation, which we will be using to do linear algebra. 
+
+First let's determine the elements of a neural network depicted above: nodes, layers, weights across nodes and activation functions.
+
+\begin{itemize}
+    \item \textbf{Nodes}. A node is basically a point where data points are received, processed and then transferred to the node. A node could be either an endpoint or a redistribution point or even both when iterations are done through the learning algorithm. The number of nodes to use is optional.
+
+    \item \textbf{Layers}. A layer consists of one or several nodes. The initial layer in the network is called the input layer and it is the entry point through which the data is fed into the neural net. The middle layers are called hidden layer because the computation results of them are not directly visible to someone interacting with the neural net. In the hidden layers, which can range from one to thousands, the features are transformed and most of the structure (both linear and nonlinear) is captured. Finally, there is the final layer, from which results are output. The nodes in each layer are fully interconnected to the ones in the next and the previous layers. 
+
+
+In our case we have a structure with 3 layers: input, output and one hidden layer. The number of nodes in the input  (i\_n), hidden (h\_n) and output (o\_n) layers are 3, 5 and 2 respectively. In Python, such a structure can be represented in the following way:
+
+\begin{lstlisting}[language=Python]
+    # Load the package to work with numbers
+    import numpy as np
+    
+    # Determine the structure of the NN
+    i_n = 3
+    h_n = 5
+    o_n = 2
+\end{lstlisting}
+
+    \item \textbf{Weights.} In order to transfer an input data point to the next layer, a predetermined number (called weight) is stored in each connection from the sender node to the receiver node. Each weight accounts for the impact between the interconnected nodes. Initially, we assign weights between nodes in neighboring layers randomly. This is needed only for the sake of initializing the structure. Later these weights will be changed in order to solve our classification problem. The weight updating will be better described in the following sections. Neural nets will have n-1 matrices of weights, where n is the number of layers in the NN. You can imagine these weight matrices sitting between two layers representing the strength of the connection between every single node of neighboring layers. Thus, each of these matrices will be of size f x p, where p is the number of nodes in the preceding layer and f is the number of nodes in the following layer.
+    This becomes more clear once you check the code below that creates 2 matrices of weights: the 5x5 matrix of weights between input and hidden layers (w\_i\_h) and the 2x5 matrix of weights between hidden and output layers (w\_h\_o). Such a dimensions of matrices are necessary in order to accomplish matrix and vector multiplications that are done in the following stages.
+
+\begin{lstlisting}[language=Python]
+    # Randomly define the weights between the layers. 
+    w_i_h = np.random.rand(h_n, i_n) # create an array of the given shape and populate it with random values.
+    w_h_o = np.random.rand(o_n, h_n) 
+    
+    # Show matrices of randomly assigned weights.
+    w_i_h
+    # w_h_o # uncomment this line in order to see the values for w_h_o.
+    # Use Cmd + / in MacOS and CTRL + / in MS Windows as a shortcut to comment/uncomment lines.
+\end{lstlisting}
+
+\begin{lstlisting}
+    array([[0.63964736, 0.97236245, 0.83944375],
+    [0.31439566, 0.54254369, 0.0456713 ],
+    [0.93759599, 0.71292359, 0.11961199],
+    [0.90587079, 0.0855728 , 0.55046849],
+    [0.89559465, 0.47349711, 0.42168825]])
+\end{lstlisting}
+
+\item \textbf{Activation Function.} The remaining element of the NN's structure is an activation function - a function which transforms an input data point that it receives from the previous nodes to an output value which will be the input for the nodes in the next layer. The activation function plays an important role in the efficiency of the neural network as it accounts for non-linearity of data. 
+It is to certain extent inspired by the concept of firing, which means that neurons fire or transmit information further only if the input surpasses certain threshold. The simplest activation function can be represented by a step function as on the picture below!!!. In our NN, we will use a slightly more elaborate activation function, the sigmoid function (logistic), which allows for more efficient use of the input data. An extended description of various activation functions, their benefits and disadvantages is given in sections below.
+
+\begin{lstlisting}[language=Python]
+    # Determine activation function.
+    def sigmoid(x):
+        # np.exp() calculates the exponential
+        # of all elements in the input array.
+        return 1 / (1 + np.exp(-x)) 
+
+    # Draw activation function.
+    import matplotlib.pyplot as plt
+    
+    # return 100 evenly spaced numbers over an interval from -10 to 10.
+    x = np.linspace(-10, 10, 100) 
+    # plot sigmoid function for sampled values.
+    plt.plot(x, sigmoid(x)) 
+    plt.show()
+\end{lstlisting}
+
+\end{itemize}
+
+
+\subsection{Data Inspection}
+
+By now we have collected all the elements of the NN. Can we use this structure in order to solve the classification problem stated in the beginning? In order to answer this question we need first to get a better understanding of the data at our disposal. 
+
+We are trying to check whether NN is able to solve the classification problem using a collection of 70 000 handwritten numbers. Each of this handwritten number is represented as 28x28 image. 
+
+The original source of the data is THE MNIST DATABASE. In the links below, you can find: 
+
+\begin{itemize}
+    \item http://yann.lecun.com/exdb/mnist/: A detailed description of the dataset and a summary of the performance results achieved by various classification algorithms.
+    \item https://pjreddie.com/projects/mnist-in-csv/: the data we will use. Here the original images are saved in CSV, which allows to work with them directly.
+\end{itemize}
+
+For the purposes of demonstration below we use a smaller dataset (100 images), which will be expanded at a later stage.
+
+
+\begin{lstlisting}[language=Python]
+    # Load the data.
+    # "r" stands for "read only" mode.
+    raw_data = open("data/mnist_train_100.csv", 'r') 
+    # read all the lines of a file in a list.
+    data = raw_data.readlines() 
+    # remove temporal file from the environment in order to save memory.
+    raw_data.close() 
+
+    # Inspect the data - check the number of observations.
+    # length of the object.
+    len(data) 
+
+    # Inspect a particular observation of the data.
+    # show observation number 0 from the list
+    # (remember that in Python numbering starts from 0).
+    data[0]
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python]
+'3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,254,254,254,254,255,209,
+126,67,32,0,0,0,0,0,0,0,0,0,0,0,
+...
+254,233,139,57,232,254,243,166,28,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'
+\end{lstlisting}
+
+From the result above, we see that 1) a particular observation looks like a string of 785 elements (label of the image + 784 elements for each pixels of a 28x28 image), 2) each element representing a pixel is a number from 0 to 255 (from white to black color) and 3) the first element in the line is the label of the image and therefore is a number from 0 to 9.
+
+Using `matplotlib`, we can also reconstruct the original image based on the data about each pixel in the string.
+
+INSERT PICTURE!!!
+% Insert Matplotlib Grapg
+% \begin{figure}[H]
+%     \includegraphics[width=\linewidth]{pics/problem.png}
+%     \caption{\label{fig:digit-classification} Digit Classification Problem}
+% \end{figure}
+
+\begin{lstlisting}[language=Python]
+    # Load the package to plot the data
+    import matplotlib.pyplot as mpp
+
+    # Plot the data
+    observation = data[0].split(',') # break down observation number 0 (comma is used to identify each element).
+    image = np.asfarray(observation[1:]).reshape((28,28)) # take all the elements starting from the element 1 
+    # (exclude element number 0, that corresponds to the label) and reshape them as an array with dimension 28 by 28.
+    mpp.imshow(image, cmap='Blues', interpolation='None') # show the plot of this array using blue pallete.
+
+    # Save an observation of the data as an input to work with.
+    input = np.array(np.asfarray(observation[1:]), ndmin=2).T # save necessary elements in a vertical vector shape.
+\end{lstlisting}
+
