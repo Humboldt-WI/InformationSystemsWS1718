@@ -1,4 +1,5 @@
 # Our additions
+.ipynb_checkpoints
 __latexindent_temp.tex
 *.pdf
 .ipynb_checkpoints/
