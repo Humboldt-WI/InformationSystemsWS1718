@@ -1,63 +1,183 @@
+\section{Deep Learning with Keras}
 
 We are now going to reimplement the previous neural network with the Keras framework. Keras is an open source neural network library written in Python. It has the advantage of abstracting most of the boiler-plate code one needs to write when implementing a neural net only with a linear algebra library. Thus, it is suitable to fast prototyping and experimentation.
 
-\subsection{Some section with code}
+It's important you make sure you have the required libraries installed for it to work. We will make use of three main libraries and their dependencies, which will be automatically installed.
+
+If you are using Anconda's Python distribution, we advise you to run \lstinline{conda install keras pandas numpy} on the terminal. 
+Otherwise, using the \lstinline{pip} package manager should also do the trick.
+Run \lstinline{pip install keras pandas numpy} on the terminal.
+
+The version of Python that will be used throughout this notebook is Python 3.6.4 from Anaconda's distribution. You can check your version of Python by executing the cell below.
 
 \begin{lstlisting}[language=Python]
     import numpy as np
-     
-    def incmatrix(genl1,genl2):
-        m = len(genl1)
-        n = len(genl2)
-        M = None #to become the incidence matrix
-        VT = np.zeros((n*m,1), int)  #dummy variable
-     
-        #compute the bitwise xor matrix
-        M1 = bitxormatrix(genl1)
-        M2 = np.triu(bitxormatrix(genl2),1) 
-     
-        for i in range(m-1):
-            for j in range(i+1, m):
-                [r,c] = np.where(M2 == M1[i,j])
-                for k in range(len(r)):
-                    VT[(i)*n + r[k]] = 1;
-                    VT[(i)*n + c[k]] = 1;
-                    VT[(j)*n + r[k]] = 1;
-                    VT[(j)*n + c[k]] = 1;
-     
-                    if M is None:
-                        M = np.copy(VT)
-                    else:
-                        M = np.concatenate((M, VT), 1)
-     
-                    VT = np.zeros((n*m,1), int)
-     
-        return M
+    from keras.models import Sequential
+    from keras.layers import Dense
+    from keras.utils import np_utils
+    
+    import pandas as pd
 \end{lstlisting}
 
-Code Output
+\subsection{Load the data}
+
+To load the data, we will use the very handy pandas' \lstinline{read_csv} function. It frees us from the burden of parsing the text file.
+
+\begin{lstlisting}[language=Python]
+    names = ["y"] + list(range(1,785))
+    df = pd.read_csv("data/mnist_train.csv", 
+                    names=names)
+
+    df_test = pd.read_csv("data/mnist_test.csv", 
+                        names=names)
+
+    df_test.head()
+\end{lstlisting}
+
+Next we separate labels from features in both train and test set and transform them from dataframes to numpy arrays, which are better suited for modeling.
+
+\begin{lstlisting}[language=Python]
+y_train = df['y'].values
+X_train = df.iloc[:, 1:].values/255*0.99+0.01
+
+y_test = df_test['y'].values
+X_test = df_test.iloc[:, 1:].values/255*0.99+0.01
+
+[y_train, y_test, X_train, X_test]
+\end{lstlisting}
+
+We now check if the shape of the arrays correspond to the expected. In fact, the shape is correct. We have 60 thousand observations in the train set and 10 thousand in the test set.
+
+\begin{lstlisting}[language=Python]
+[y_train.shape, X_train.shape, y_test.shape, X_test.shape]
+\end{lstlisting}
+
+Before defining the model, one extra step is necessary: transform the labels so they are one-hot encoded. One-hot encoding a vector means transforming it into a matrix of ones and zeroes only with as many columns as the number of different values in the vector. In the specific case, the label vector becomes a ten-column array, each column representing one digit. If the label of the observation is 2, it will have zeroes in columns expect in the third column, which will have a one. The number of rows remains the same. with the same number of rows as before.
+
+\begin{lstlisting}[language=Python]
+y_train = np_utils.to_categorical(y_train)
+y_test = np_utils.to_categorical(y_test)
+
+[y_test.shape, y_train.shape]
+\end{lstlisting}
+
+\subsection{Model}
+
+\subsubsection{Define the model}
+
+We finally come to the most important part. We will accomplish the task of building the neural network with only eight lines of code.
+
+The model in question consists of one input, one hidden and one output layer. The activation function of the hidden layer is a ReLU. And we use as the optimizer Stochastic Gradient Descent. 
+
+Keras makes it very simple to add new layers. One needs only to call the `add` method on the model and pass the layer with its specifications. As you can see, the number of inputs needs to be specified only in the first layer. Keras infers the input number of a layer by looking at the number of outputs of its predecessor.
+
+For this neural network, we will only use dense layers, which are layers with all nodes fully connected to each other. Keras, however, allows you to arbitrarily build your neural networks by providing different types of layers, such as convolutional and pooling layers.
+
+\begin{lstlisting}[language=Python]
+    def baseline_model(num_hidden_n, num_pixels, num_classes, optimizer):
+        model = Sequential()
+        model.add(Dense(num_hidden_n, input_dim=num_pixels, kernel_initializer='normal', activation='relu'))
+        model.add(Dense(num_classes, kernel_initializer='normal', activation='softmax'))
+        
+        # Compile model
+        model.compile(loss='categorical_crossentropy', 
+                    optimizer=optimizer,
+                    metrics=['accuracy'])
+        return model
+\end{lstlisting}
+
+\subsubsection{Instantiate the model}
+
+Having defined the structure of the model, we can now instantiate a concrete version of it by picking the relevant parameters and calling the function that returns the model object.
+
+Here we have chosen the hidden layers to have 90 nodes, while input and output layers have 784 and 10 nodes respectively. 
+
+\begin{lstlisting}[language=Python]
+    num_pixels, num_hidden_n, num_classes = 784, 90, 10
+    optimizer = 'sgd'
+    
+    model = baseline_model(num_hidden_n, num_pixels, num_classes, optimizer)
+\end{lstlisting}
+
+\subsubsection{Train and evaluate the model}
+
+With the model instantiated, we can finally call the fit method on it using the data set we prepared before.
+
+After training the model we evaluate its performance by looking at its accuracy.
+
+\begin{lstlisting}[language=Python]
+    model.fit(X_train,
+        y_train, 
+        epochs=5,
+        batch_size=200,
+        verbose=2)
+    scores = model.evaluate(X_test, y_test, verbose=0)
+    print("Baseline Error: %.2f%%" % (100-scores[1]*100))
+\end{lstlisting}
 
 \begin{lstlisting}
-    array([[ 0.01,  0.01,  0.01, ...,  1.  ,  0.01,  0.01],
-        [ 0.01,  0.01,  1.  , ...,  0.01,  0.01,  0.01],
-        [ 0.01,  1.  ,  0.01, ...,  0.01,  0.01,  0.01],
-        ..., 
-        [ 0.01,  0.01,  0.01, ...,  0.01,  0.01,  0.01],
-        [ 0.01,  0.01,  0.01, ...,  0.01,  0.01,  0.01],
-        [ 0.01,  0.01,  0.01, ...,  0.01,  0.01,  0.01]])
+    Epoch 1/5
+    - 2s - loss: 1.9537 - acc: 0.5054
+   Epoch 2/5
+    - 2s - loss: 1.1453 - acc: 0.7680
+   Epoch 3/5
+    - 2s - loss: 0.7509 - acc: 0.8296
+   Epoch 4/5
+    - 2s - loss: 0.5942 - acc: 0.8552
+   Epoch 5/5
+    - 2s - loss: 0.5129 - acc: 0.8706
+   Baseline Error: 11.96%
 \end{lstlisting}
 
-\subsection{Section where we add a figure}
+The error rate does not seem very good. Maybe we could try a different optimizer. We will instantiate and fit the model again with the RMSprop optimization algorithm. By using Keras, the only thing you need to do is to pass a different argument to the model.
 
-\begin{figure}[H]
-    \includegraphics[width=\linewidth]{img/wrong_predictions.jpeg}
-    \centering
-    \caption{Wrong Predtictions}
-    \label{fig:wrong-predictions}
-\end{figure}
+\begin{lstlisting}[language=Python]
+    model = baseline_model(num_hidden_n,
+        num_pixels,
+        num_classes,
+        optimizer = "rmsprop")
 
-Figure \ref{fig:wrong-predictions} is very nice.
+    model.fit(X_train,
+    y_train, 
+    epochs=5,
+    batch_size=200,
+    verbose=2)
+    scores = model.evaluate(X_test, y_test, verbose=0)
+    print("Baseline Error: %.2f%%" % (100-scores[1]*100))
+\end{lstlisting}
 
-\begin{equation}
-    \int E=m \beta
-\end{equation}
+\begin{lstlisting}
+    Epoch 1/5
+    - 2s - loss: 0.4963 - acc: 0.8723
+   Epoch 2/5
+    - 2s - loss: 0.2401 - acc: 0.9306
+   Epoch 3/5
+    - 2s - loss: 0.1828 - acc: 0.9477
+   Epoch 4/5
+    - 2s - loss: 0.1466 - acc: 0.9581
+   Epoch 5/5
+    - 2s - loss: 0.1223 - acc: 0.9640
+   Baseline Error: 3.54%   
+\end{lstlisting}
+
+\subsubsection{Save the model}
+
+Once trained, you might want to use the model in the future. You can do so by saving it to a file for later use. Keras comes equipped with the `save` method, which allows you to easily save your trained model to the disk.
+
+We are going to save the model into a file called `model.h5` and delete it from memory.
+
+\begin{lstlisting}[language=Python]
+    model.save("model.h5")
+    del model    
+\end{lstlisting}
+
+Then we load the model from the file we just created and evaluate it again to make sure that during the saving process, the model hasn't been corrupted. The base line error is the same: the model has been successfully saved and can be shared with third-parties. 
+
+\begin{lstlisting}[language=Python]
+    from keras.models import load_model
+
+    model2 = load_model("model.h5")
+    
+    scores2 = model2.evaluate(X_test, y_test, verbose=0)
+    print("Baseline Error: %.2f%%" % (100-scores2[1]*100))    
+\end{lstlisting}

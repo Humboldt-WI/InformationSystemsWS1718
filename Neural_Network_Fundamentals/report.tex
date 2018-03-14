@@ -2,7 +2,7 @@
 
 \usepackage{graphicx}
 \usepackage{amsmath}
-\usepackage{amsfonts}
+% \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{authblk}
 
@@ -15,11 +15,18 @@
 \usepackage[flushleft]{threeparttable}
 
 % Added Packages ========
+\usepackage[backend=biber]{biblatex}
+\addbibresource{dl-bibliography.bib} 
+
+\usepackage[margin=1in]{geometry} % set margin to one inch
 \usepackage{float}
 \usepackage{blindtext}
 % Code highlighting
 \usepackage{listings} 
 \usepackage{color}
+% \usepackage{lmodern,textcomp}
+\usepackage{tgbonum}
+
  
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
@@ -71,6 +78,7 @@
 \section{Introduction}
 \label{sec:intro}
 \input{content/intro}
+\cite{chollet2018deep}
 
 \section{Deep Learning with Keras}
 \label{sec:keras}
@@ -80,9 +88,10 @@
 %\bibliographystyle{spbasic}    % basic style, author-year citations
 %\bibliographystyle{spmpsci}     % mathematics and physical sciences
 %\bibliographystyle{spphys}     % APS-like style for physics
-\bibliographystyle{plain}
-\bibliography{references}       % name your BibTeX data base
+% \bibliographystyle{plain}
+% \bibliography{references}       % name your BibTeX data base
 
+\printbibliography
 \end{document}
 % end of file template.tex
 
