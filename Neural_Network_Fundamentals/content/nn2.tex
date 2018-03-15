@@ -73,20 +73,63 @@ Given multidimensionality of the function, which we need to differentiate, the s
     \caption{\label{fig:bp} CHANGE THIS PICTURE}
 \end{figure}
 
-Mathematically the differentiation process can be illustrated on the example of weights between output and hidden layers (Who). The same process but with corresponding values should be applied for the weights between input and hidden layers (Wih).
+Mathematically the differentiation process can be illustrated on the example of weights between output and hidden layers \(w_{ho}\). The same process but with corresponding values should be applied for the weights between input and hidden layers \(w_{ih}\).
 
-As it can be seen from the formulas !!! the error we want to minimize (E) can be defined as the sum of squared differences between the target (Tn) and output (On) values of the NN. The sum of differences for all the nodes in the layer is relevant but when doing calculation for a particular node this sum can be omitted - only the difference between particular output (Oo) and target (Oo) matters.
+As it can be seen from the formulas !!! the error we want to minimize \(E\) can be defined as the sum of squared differences between the target \(t_n\) and output \(o_n\) values of the NN. The sum of differences for all the nodes in the layer is relevant but when doing calculation for a particular node this sum can be omitted - only the difference between particular output \(o_o\) and target \(_o\) matters.
 
-Target value is constant. Output value depends on weights and is obtained after applying sigmoid function to the sum of inputs (outputs of the previous layer - Oh) multiplied by corresponding weights (Who).
+Target value is constant. Output value depends on weights and is obtained after applying sigmoid function to the sum of inputs (outputs of the previous layer - \(o_h\) multiplied by corresponding weights \(w_{ho}\).
+
+\begin{equation}
+\frac{\partial E}{\partial w_{ho}}=\frac{\partial}{\partial w_{ho}}\displaystyle\sum_{n=1}^{n} (t_n-o_n)^2=\frac{\partial}{\partial w_{ho}}(t_o-o_o)^2
+\end{equation}
+
+\begin{equation}
+\frac{\partial E}{\partial w_{ho}}=\frac{\partial E}{\partial O_{o}}\frac{\partial O}{\partial w_{ho}}=-2(t_o-o_o)\frac{\partial O}{\partial w_{ho}}
+\end{equation}
+
+\begin{equation}
+\frac{\partial E}{\partial w_{ho}}=-2(t_o-o_o)\frac{\partial}{\partial w_{ho}}sigmoid(\sum(w_{ho}o_h)
+\end{equation}
 
 \begin{figure}[H]
     \includegraphics[width=\linewidth]{pics/formula2.png}
     \caption{\label{fig:bp} Gradient Descent}
 \end{figure}
 
-The formula for derivative of the sigmoid function is provided below !!! It is necessary to keep in mind that the sum to which we apply sigmoid function also depends on the change of weights (Who). Therefore one should follow the chain rule for derivation.
+The formula for derivative of the sigmoid function is provided below !!! It is necessary to keep in mind that the sum to which we apply sigmoid function also depends on the change of weights \(w_{ho}\). Therefore one should follow the chain rule for derivation.
+
+\begin{equation}
+\frac{\partial}{\partial x}sigmoid(x)=sigmoid(x)(1-sigmoid(x))
+\end{equation}
+
+\begin{equation}
+\frac{\partial E}{\partial w_{ho}}=-2(t_o-o_o)sigmoid(\sum_{h=1}^{h} (w_{ho}o_h)(1-sigmoid(\sum_{h=1}^{h} (w_{ho}o_h))\frac{\partial (\sum_{h=1}^{h} (w_{ho}o_h))}{\partial w_{ho}}
+\end{equation}
+
+\begin{equation}
+\frac{\partial E}{\partial w_{ho}}=-2(t_o-o_o)sigmoid(\sum_{h=1}^{h} (w_{ho}o_h)(1-sigmoid(\sum_{h=1}^{h} (w_{ho}o_h))o_h
+\end{equation}
+
+\begin{figure}[H]
+    \includegraphics[width=\linewidth]{pics/formula3.png}
+    \caption{\label{fig:bp} Gradient Descent}
+\end{figure}
+
+The formula we derive is for one particular node. We can however apply it to all the nodes in the layer. In order to do so the only thing we need is to consider this formula in matrix notation. Thus, necessary update of weights linked to all the nodes in a layer will be calculated.
+
+\begin{equation}
+\frac{\partial E}{\partial W_{ho}}=-2*O_{error}*O_{output}*(1-O_{output})*O_h^T
+\end{equation}
 
 After solving the minimization problem we can update the weights we have assigned before.
+
+\begin{equation}
+new W_{ho}=old W_{ho}-\frac{\partial E}{\partial W_{ho}}
+\end{equation}
+
+\begin{equation}
+\Delta W_{ho}=-2*(T_o-O_o)*sigmoid(O_o)*(1-sigmoid(O_o)*O_h^T
+\end{equation}
 
 \begin{figure}[H]
     \includegraphics[width=\linewidth]{pics/formula5.png}
@@ -97,7 +140,7 @@ In code this can be represented as follows:
 
 \begin{lstlisting}[language=Python]
     # Update the matrix for weights between hidden and output layers:
-    w_h_o += np.dot((o_errors * o_output * (1.0 - o_output)), np.transpose(h_output))
+    w_h_o += np.dot((o_errors * o_output * (1.0 - o_output)), np.transpose(h_output)) # 2 can be omitted as being related to the learning rate.
     # Update the matrix for weights between input and hidden layers:
     w_i_h += np.dot((h_errors * h_output * (1.0 - h_output)), np.transpose(input))"
 \end{lstlisting}
