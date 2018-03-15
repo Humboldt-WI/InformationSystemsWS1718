@@ -6,33 +6,33 @@ Output of each node is the sum of the multiplications of the output of previous 
 
 To understand this better it is worth imagining the following example:
 \begin{itemize}
-   \item \textbf node 1 in the output layer of the NN should be equal to 0,01;
-   \item \textbf instead the NN is providing us with 0,8.
+   \item  node 1 in the output layer of the NN should be equal to 0.01
+   \item  instead the NN is providing us with 0.8
 \end{itemize}
 
 In this case we should do the following:
 \begin{enumerate}
-   \item \textbf Calculate the error of the node (-0,79 in our example);
-   \item \textbf Calculate how much error has been brought by every link to this node.
+   \item Calculate the error of the node (-0.79 in our example)
+   \item Calculate how much error has been brought by every link to this node
 \end{enumerate}
 
-For instance if weight w11 is 0,6 and w21 is 0,4 then they are associated with an error of -0,79x(0,6/1) and -0,79x(0,4/1) respectively (see Pictures below).
+For instance if weight w11 is 0.6 and w21 is 0.4 then they are associated with an error of -0.79x(0.6/1) and -0.79x(0.4/1) respectively (see Pictures below).
 
 \begin{figure}[H]
     \includegraphics[width=\linewidth]{pics/bp_1.png}
-    \caption{\label{fig:bp} Back propagation 1}
+    \caption{\label{fig:bp1} Back propagation 1}
 \end{figure}
 
 After calculation of how much error is associated with every weight we can obtain the errors for the nodes in the proceeding layer.
  
 For instance error term for node 1 in the hidden layer will we equal to:
 \begin{itemize}
-   \item \textbf the sum of errors associated with all the weights (w11 and w12 in our case) that link this node with the next layer. (see Picture below).
+   \item the sum of errors associated with all the weights (w11 and w12 in our case) that link this node with the next layer. (see Picture below).
 \end{itemize}
 
 \begin{figure}[H]
     \includegraphics[width=\linewidth]{pics/bp_2.png}
-    \caption{\label{fig:bp} Back propagation 2}
+    \caption{\label{fig:bp2} Back propagation 2}
 \end{figure}
 
 Once we repeat this procedure for all the nodes in all layers we can find out how much every node should be changed.
@@ -255,7 +255,7 @@ Once we have trained the model with 100 observations we can test it with new dat
     7
 \end{lstlisting}
 
-After working with a particular observation from the testset we can label all of them and evaluate the accuracy of our NN.
+After working with a particular observation from the test set we can label all of them and evaluate the accuracy of our NN.
 
 \begin{lstlisting}[language=Python]   
     # Test the neural network using all test dataset:
@@ -298,11 +298,11 @@ After working with a particular observation from the testset we can label all of
   
 \subsection{Further Improvements}
 
-\textbf{Training with several epochs}
+\subsubsection{Training with several epochs}
    
 One way to improve the results of the NN is to train it more. For instance we can feedforward the same 100 observations more than once. Despite the fact that these are the same observations, longer training allows NN to accumulate more knowledge. Keep in mind that due to the presence of a learning rate NN receives only part of the information that is available and useful to predict particular observation. Seeing the same observations several times leads to smaller loss of the data.
    
-So let's introduce one extra parameter called "epochs" and create a loop around the number of epochs. The rest of the code we see below is the same as before.
+So let's introduce one extra parameter called epochs and create a loop around the number of epochs. The rest of the code we see below is the same as before.
    
 \begin{lstlisting}[language=Python]   
     epochs = 5
@@ -364,7 +364,7 @@ So let's introduce one extra parameter called "epochs" and create a loop around 
 \end{lstlisting}
 
 
-\textbf{Training with other Learning Rate}
+\subsubsection{Training with other Learning Rate}
    
 The smaller the learning rate the more capable the network to optimize the weights in a more accurate way. At the same time one should keep in mind that small l\_r also means additional loss of information extracted from each particular observation. Hence, there should be many training observations available in order to make the trade-off between accuracy and usage of available data reasonable. Given that we have more epochs now, it is interesting to try a smaller learning rate.
 
@@ -374,7 +374,7 @@ The smaller the learning rate the more capable the network to optimize the weigh
     # run the "big loop" with epochs again to get measure accuracy for new settings.
 \end{lstlisting}
 
-\textbf{A more complicated structure}
+\subsubsection{A more complicated structure}
 
 As you may remember in the beginning we have assigned the number of nodes in the hidden layer based on some rule of thumb assumptions. Now we can test if the NN will perform better if we increase the number of hidden nodes.
 
@@ -394,7 +394,7 @@ It is always possible to train neural networks where the number of neurons is la
 
 With a smaller number of neurons, it is more complicated to train the network to very small errors, but it may produce much better approximations for new patterns. The most common mistake made by many researchers is that in order to speed up the training process and to reduce the training errors, they use neural networks with a larger number of neurons than required. Such networks could perform poorly for new patterns not seen previously by the NN.
 
-\textbf{Other training set}
+\subsubsection{Other training set}
 
 One other source of improvement is providing the NN with a relatively big dataset for training. Everything that was done before was implemented with just 100 observations. Let's see if our results improve if we increase our training dataset to 60 000 observations. As we have more data now we will reduce the number of epochs and keep having low learning rate.
 
@@ -414,4 +414,4 @@ One other source of improvement is providing the NN with a relatively big datase
     # run the "big loop" with epochs again to get measure accuracy for new settings.
 \end{lstlisting}
 
-The result we achieve with a big training set is already pretty impressive. In more than 90 \% of cases our NN is able to solve the classification problem properly. And we should remember that it was implemented from scratch using only basic linear algebra packages. Let's see in the following section if we can do better or if we can simplify the process using specialized packages to build neural networks.
+The result we achieve with a big training set is already pretty impressive. In more than 90\% of cases our NN is able to solve the classification problem properly. And we should remember that it was implemented from scratch using only basic linear algebra packages. Let's see in the following section if we can do better or if we can simplify the process using specialized packages to build neural networks.
