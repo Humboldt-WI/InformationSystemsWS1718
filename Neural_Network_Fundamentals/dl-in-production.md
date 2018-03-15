@@ -72,7 +72,7 @@ conda install nb_conda
 
 After starting a notebook, go to `Kernel > Change kernel` in the menu and choose the Kernel of your like.
 
-![Denis](img/jupyter-change-env.png)
+![How to change environment in a Jupyter notebook](img/jupyter-change-env.png)
 
 Conda environments is a very rich utility. We have only scratched its surface so far. Further details on how to create and manage environments can be found [here](https://conda.io/docs/user-guide/tasks/manage-environments.html).
 
@@ -367,7 +367,7 @@ p <- df %>%
 p
 ```
 
-![image](img/wrong_predictions.jpeg)
+![Distribution of Wrong Predictions](img/wrong_predictions.jpeg)
 
 ## Deploy to Heroku
 
@@ -377,7 +377,7 @@ There are many options on the market to accomplish that. We chose to use [Heroku
 
 You will have to create a Heroku account if you still want to follow along. After creating the account, you will be able to log to your Heroku dashboard and from there you can create a new Heroku app. We have named our app `flask-digit-classifier`.
 
-![heroku-dashboard](img/heroku-dashboard.png)
+![Heroku Dashboad](img/heroku-dashboard.png)
 
 The way the deployment will is the following:
 
@@ -444,10 +444,19 @@ In our case, our app was deployed to `https://flask-digit-classifier.herokuapp.c
 
 ## Shiny App
 
-Whew! We hope you made thus far. As a surprise we have developed a slightly more sophisticated client for our API. We created a Shiny App to help you visualize the how the model makes its predictions.
+Whew! We hope you made thus far. As a surprise we have developed a slightly more sophisticated client for our API. We created a Shiny App to help you visualize how the model makes its predictions and where it falls short.
 
-![shiny-app-digit-recognition](img/shiny-app-digit-recognition.png)
+![Shiny App for Digit Recognition](img/shiny-app-digit-recognition.png)
 
-Here you have a link for the [Shiny App](https://denismaciel.shinyapps.io/digit-classification/). And here is the link of our [Flask API](https://flask-digit-classifier.herokuapp.com/home).
+Here you have links for:
+
+- **Shiny App**: https://denismaciel.shinyapps.io/digit-classification
+- **Flask API**: https://flask-digit-classifier.herokuapp.com/home
 
 The API sending the predictions is exactly the same one we just built and deployed to Heroku. The Shiny App is deployed on a completely different platform and is communicating with the Flask API over the Internet. Quite neat, right?
+
+If you got lost somewhere along the way, you can find all the code used here in the following repository:
+
+- https://github.com/denismaciel/foundations-of-deep-learning
+
+We hope this tutorial has helped you to deploy your very own deep learning model! If anything's still unclear, don't hesitate to get in touch. Drop us a line at
