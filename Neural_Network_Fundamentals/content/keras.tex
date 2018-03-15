@@ -65,7 +65,7 @@ We finally come to the most important part. We will accomplish the task of build
 
 \subsubsection{Activation Functions and Gradient Descent}
 
-The activation functions are compared to each other in terms of their efficient approximation (Schnitger & DasGupta, 1993). There are several types of them but the common ones are the sigmoid, tangent hyperbolic and the ReLU functions. The following is a short explanation on the advantages and disadvantages of each of these activation functions. 
+The activation functions are compared to each other in terms of their efficient approximation. There are several types of them but the common ones are the sigmoid, tangent hyperbolic and the ReLU functions. The following is a short explanation on the advantages and disadvantages of each of these activation functions. 
 
 \begin{itemize}
     \item Sigmoid function: This function squashes the input value into a value in the range of [0,1]. It is powerful to compute bolean functions and the smoothness of sigmoid allows for better approximation \cite{dasgupta1993power}. However, there are two major drawbacks. First, the sigmoid outputs 0 for high negative values and 1 for high positive values and this result in no signal flows from the nodes because the gradient at these two tails are 0. Second, its output is not centered at 0. This would ultimately result in either all positive gradients on weights or all negative during the backpropogation.
