@@ -3,11 +3,9 @@
 # Created by: areiche
 # Created on: 24.01.2018
 
-##Benchmarking
 ##                                  How to ANALYSE and ACCESS a single subject
 ## Accessing the odds of a single person/data point in the data set to predict its individual survival:
 data(pbc)
-pbc$protime[which(is.na(pbc$protime))] <- 0.1
 cox_model <- coxph(Surv(time, status == 2) ~ age + edema + log(bili) + log(albumin) + log(protime), data=pbc)
 summary(cox_model)
 curves <- survfit(cox_model, pbc)
@@ -21,16 +19,16 @@ plot(curves[200], xlab = "Days", ylab="Survival Probability")
 
 ## To add entirely new data and see its performance, we have to enrich X
 ## curves <- survfit(cox_model, newdata = X)
-plot(survfit(cox_model, newdata=data.frame(age=60,edema=2.0,bili=2.6,albumin=1.3,protime=3)),
+plot(survfit(cox_model2, newdata=data.frame(age=60,edema=2.0,bili=2.6,albumin=1.3,protime=3)),
 xlab = "Days", ylab="Survival")
 
 
 ##                                  Predicting the future outlook
 ## The cumulative incidence curve is an alternative to the Kaplan-Meier for competing risks data.
 ## A Kaplan-Meier estimate, treating death due to other causes as censored, gives a 12 year cumulate rate of 10%
-## for the 424 patients of PBC. The CI estimate, on the other hand, estimates the total number of conversions
+## for the 424 patients of PBC. The CuIn estimate, on the other hand, estimates the total number of conversions
 ## that will actually occur. Because the population is older, this is smaller than the KM,
-## 7% at 12 years for PBC's data. If there were no censoring, then CI(t) could very simply be computed as
+## 7% at 12 years for PBC's data. If there were no censoring, then CuIn(t) could very simply be computed as
 ## total number of patients with progression by time t divided by the sample size n.
 
 par(mfrow = c(1, 1))
@@ -74,8 +72,7 @@ abline(a=0, b= 1)
 auc.perf = performance(pred, measure = "auc")
 auc.perf@y.values
 
-
-##                                                     Benchmark the models
+##                                                      Benchmark the models
 ## Training a data set
 data(pbc,package = "survival")
 pbc_clean <- pbc[!is.na(pbc$age)
@@ -197,12 +194,6 @@ auc.perf_atf_model_log_2_3 = performance(pred_atf_model_log_2_3, measure = "auc"
 auc.perf_atf_model_log_3_3 = performance(pred_atf_model_log_3_3, measure = "auc")
 
 
-##                                    Table AUC and CI for all models
-table_benchmark <- read.csv("benchmark.csv", fill = TRUE, header = TRUE, sep = ";")
-print(table_benchmark)
-
-
-
 
 ##                                      Final Benchmarking and Future Outlook
 ## It can happen that we have different costs for false negative and false positive
@@ -241,238 +232,3 @@ pauc.perf@y.values
 ## Divide pAUC by fpr.stop to receive a standardized result form 0 to 1 like AUC
 pauc.perf@y.values = lapply(pauc.perf@y.values, function(x) x / 0.1)
 pauc.perf@y.values
-
-
-
-##                                                  Backup - FOR Concordance Indices
-## Receive all CIs for gbm models
-## gbmpbc_1_3
-gbmtrainpbc = predict(object = gbmpbc_1_3,
-newdata = trainpbc_1_3,
-n.trees = 1500,
-type = "response")
-
-
-gbmtestpbc = predict(object = gbmpbc_1_3,
-newdata = testpbc_2_3,
-n.trees = 1500,
-type = "response")
-
-
-Survresptrainpbc <- Surv(trainpbc_1_3$time,trainpbc_1_3$status==2)
-Survresptestpbc <- Surv(testpbc_2_3$time,testpbc_2_3$status == 2)
-CI_gbmpbc_1_3 <- BeggC(Survresptrainpbc, Survresptestpbc, gbmtrainpbc, gbmtestpbc)
-if(CI_gbmpbc_1_3<=0.5){
-    CI_gbmpbc_1_3 =1-CI_gbmpbc_1_3
-}
-CI_gbmpbc_1_3
-
-## gbmpbc_2_3
-gbmtrainpbc = predict(object = gbmpbc_2_3,
-newdata = trainpbc_2_3,
-n.trees = 1500,
-type = "response")
-
-
-gbmtestpbc = predict(object = gbmpbc_2_3,
-newdata = testpbc_1_3,
-n.trees = 1500,
-type = "response")
-
-
-Survresptrainpbc <- Surv(trainpbc_2_3$time,trainpbc_2_3$status==2)
-Survresptestpbc <- Surv(testpbc_1_3$time,testpbc_1_3$status == 2)
-CI_gbmpbc_2_3 <- BeggC(Survresptrainpbc, Survresptestpbc, gbmtrainpbc, gbmtestpbc)
-if(CI_gbmpbc_2_3<=0.5){
-    CI_gbmpbc_2_3 =1-CI_gbmpbc_2_3
-}
-CI_gbmpbc_2_3
-
-## atf_model_weibull_1_3
-trainpbc = predict(object = atf_model_weibull_1_3,
-newdata = trainpbc_1_3,
-n.trees = 1500,
-type = "response")
-
-
-testpbc = predict(object = atf_model_weibull_1_3,
-newdata = testpbc_2_3,
-n.trees = 1500,
-type = "response")
-
-
-Survresptrainpbc <- Surv(trainpbc_1_3$time,trainpbc_1_3$status==2)
-Survresptestpbc <- Surv(testpbc_2_3$time,testpbc_2_3$status == 2)
-CI_atf_model_weibull_1_3 <- BeggC(Survresptrainpbc, Survresptestpbc, trainpbc, testpbc)
-if(CI_atf_model_weibull_1_3<=0.5){
-    CI_atf_model_weibull_1_3 =1-CI_atf_model_weibull_1_3
-}
-CI_atf_model_weibull_1_3
-
-## atf_model_weibull_2_3
-trainpbc = predict(object = atf_model_weibull_2_3,
-newdata = trainpbc_2_3,
-n.trees = 1500,
-type = "response")
-
-
-testpbc = predict(object = atf_model_weibull_2_3,
-newdata = testpbc_1_3,
-n.trees = 1500,
-type = "response")
-
-
-Survresptrainpbc <- Surv(trainpbc_2_3$time,trainpbc_2_3$status==2)
-Survresptestpbc <- Surv(testpbc_1_3$time,testpbc_1_3$status == 2)
-CI_atf_model_weibull_2_3 <- BeggC(Survresptrainpbc, Survresptestpbc, trainpbc, testpbc)
-if(CI_atf_model_weibull_2_3<=0.5){
-    CI_atf_model_weibull_2_3 =1-CI_atf_model_weibull_2_3
-}
-CI_atf_model_weibull_2_3
-
-## atf_model_weibull_3_3
-trainpbc = predict(object = atf_model_weibull_3_3,
-newdata = pbc_clean,
-n.trees = 1500,
-type = "response")
-
-
-testpbc = predict(object = atf_model_weibull_3_3,
-newdata = testpbc_1_3,
-n.trees = 1500,
-type = "response")
-
-
-Survresptrainpbc <- Surv(pbc_clean$time,pbc_clean$status==2)
-Survresptestpbc <- Surv(testpbc_1_3$time,testpbc_1_3$status == 2)
-CI_atf_model_weibull_3_3 <- BeggC(Survresptrainpbc, Survresptestpbc, trainpbc, testpbc)
-if(CI_atf_model_weibull_3_3<=0.5){
-    CI_atf_model_weibull_3_3 =1-CI_atf_model_weibull_3_3
-}
-CI_atf_model_weibull_3_3
-
-## atf_model_exponential_1_3
-trainpbc = predict(object = atf_model_exponential_1_3,
-newdata = trainpbc_1_3,
-n.trees = 1500,
-type = "response")
-
-
-testpbc = predict(object = atf_model_exponential_1_3,
-newdata = testpbc_2_3,
-n.trees = 1500,
-type = "response")
-
-
-Survresptrainpbc <- Surv(trainpbc_1_3$time,trainpbc_1_3$status==2)
-Survresptestpbc <- Surv(testpbc_2_3$time,testpbc_2_3$status == 2)
-CI_atf_model_exponential_1_3 <- BeggC(Survresptrainpbc, Survresptestpbc, trainpbc, testpbc)
-if(CI_atf_model_exponential_1_3<=0.5){
-    CI_atf_model_exponential_1_3 =1-CI_atf_model_exponential_1_3
-}
-CI_atf_model_exponential_1_3
-
-## atf_model_exponential_2_3
-trainpbc = predict(object = atf_model_exponential_2_3,
-newdata = trainpbc_2_3,
-n.trees = 1500,
-type = "response")
-
-
-testpbc = predict(object = atf_model_exponential_2_3,
-newdata = testpbc_1_3,
-n.trees = 1500,
-type = "response")
-
-
-Survresptrainpbc <- Surv(trainpbc_2_3$time,trainpbc_2_3$status==2)
-Survresptestpbc <- Surv(testpbc_1_3$time,testpbc_1_3$status == 2)
-CI_atf_model_exponential_2_3 <- BeggC(Survresptrainpbc, Survresptestpbc, trainpbc, testpbc)
-if(CI_atf_model_exponential_2_3<=0.5){
-    CI_atf_model_exponential_2_3 =1-CI_atf_model_exponential_2_3
-}
-CI_atf_model_exponential_2_3
-
-## atf_model_exponential_3_3
-trainpbc = predict(object = atf_model_exponential_3_3,
-newdata = pbc_clean,
-n.trees = 1500,
-type = "response")
-
-
-testpbc = predict(object = atf_model_exponential_3_3,
-newdata = testpbc_1_3,
-n.trees = 1500,
-type = "response")
-
-
-Survresptrainpbc <- Surv(pbc_clean$time,pbc_clean$status==2)
-Survresptestpbc <- Surv(testpbc_1_3$time,testpbc_1_3$status == 2)
-CI_atf_model_exponential_3_3 <- BeggC(Survresptrainpbc, Survresptestpbc, trainpbc, testpbc)
-if(CI_atf_model_exponential_3_3<=0.5){
-    CI_atf_model_exponential_3_3 =1-CI_atf_model_exponential_3_3
-}
-CI_atf_model_exponential_3_3
-
-## atf_model_log_1_3
-trainpbc = predict(object = atf_model_log_1_3,
-newdata = trainpbc_1_3,
-n.trees = 1500,
-type = "response")
-
-
-testpbc = predict(object = atf_model_log_1_3,
-newdata = testpbc_2_3,
-n.trees = 1500,
-type = "response")
-
-
-Survresptrainpbc <- Surv(trainpbc_1_3$time,trainpbc_1_3$status==2)
-Survresptestpbc <- Surv(testpbc_2_3$time,testpbc_2_3$status == 2)
-CI_atf_model_log_1_3 <- BeggC(Survresptrainpbc, Survresptestpbc, trainpbc, testpbc)
-if(CI_atf_model_log_1_3<=0.5){
-    CI_atf_model_log_1_3 =1-CI_atf_model_log_1_3
-}
-CI_atf_model_log_1_3
-
-## atf_model_log_2_3
-trainpbc = predict(object = atf_model_log_2_3,
-newdata = trainpbc_2_3,
-n.trees = 1500,
-type = "response")
-
-
-testpbc = predict(object = atf_model_log_2_3,
-newdata = testpbc_1_3,
-n.trees = 1500,
-type = "response")
-
-
-Survresptrainpbc <- Surv(trainpbc_2_3$time,trainpbc_2_3$status==2)
-Survresptestpbc <- Surv(testpbc_1_3$time,testpbc_1_3$status == 2)
-CI_atf_model_log_2_3 <- BeggC(Survresptrainpbc, Survresptestpbc, trainpbc, testpbc)
-if(CI_atf_model_log_2_3<=0.5){
-    CI_atf_model_log_2_3 =1-CI_atf_model_log_2_3
-}
-CI_atf_model_log_2_3
-
-## atf_model_log_3_3
-trainpbc = predict(object = atf_model_log_3_3,
-newdata = pbc_clean,
-n.trees = 1500,
-type = "response")
-
-
-testpbc = predict(object = atf_model_log_3_3,
-newdata = testpbc_1_3,
-n.trees = 1500,
-type = "response")
-
-
-Survresptrainpbc <- Surv(pbc_clean$time,pbc_clean$status==2)
-Survresptestpbc <- Surv(testpbc_1_3$time,testpbc_1_3$status == 2)
-CI_atf_model_log_3_3 <- BeggC(Survresptrainpbc, Survresptestpbc, trainpbc, testpbc)
-if(CI_atf_model_log_3_3<=0.5){
-    CI_atf_model_log_3_3 =1-CI_atf_model_log_3_3
-}
-CI_atf_model_log_3_3
