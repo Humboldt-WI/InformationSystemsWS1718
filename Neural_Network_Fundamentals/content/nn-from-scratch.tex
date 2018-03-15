@@ -168,7 +168,7 @@ INSERT PICTURE!!!
 \end{lstlisting}
 
 
-\subsection{Fitting the structure of the NN to the Data}
+\subsection{Fitting the Structure of the NN to the Data}
 
 After inspecting the data, we can conclude that the structure in Figure \ref{fig:nn-schema} with 3-5-2 nodes is probably not optimal and therefore should be updated in order to fit the data we have and peculiarities of the classification problem: 
 
@@ -270,3 +270,94 @@ Below you can see the code implementation of all the steps for all layers of the
 \end{lstlisting}
 
 \subsection{Good Practices on Data Treatment}
+
+Once we check the output of the NN and the results of each performed step, we can observe that already at the stage of the h\_output all the data converts to a vector in which all the values are equal to 1. Such a vector does not provide us with any helpful insight. Apparently, something is wrong with what we have done so far. There could be several reasons for the problem we face. Take a look at our sigmoid function in Figure \ref{fig:sigmoid-fct}.
+
+\begin{figure}[H]
+    \includegraphics[width=\linewidth]{pics/sigmoid-fct}
+    \caption{\label{fig:sigmoid-fct} Sigmoid Function}
+\end{figure}
+
+As we can see the output of the sigmoid function will be almost identical once we feed a number bigger than 2. Similarly there is no significant difference between the outputs if numbers used are smaller than -2. Hence the application of sigmoid function to the original data leads to a loss of valuable information. The NN has problems learning something from the inputs, which are almost undifferentiable.  
+
+One solution is to transform the input we have. Ideally we should have our data in a range between 0 and 1. It is also desirable to avoid zeros as inputs, because the output of a zero input will always be zero, no matter how large the weights are, in which case the NN will not be able to use this input to learn.
+
+We can perform a transformation of the original data as the one coded below.
+
+\begin{lstlisting}[language=Python]
+    # Good practice transformation of the input values:
+    input = np.array((np.asfarray(observation[1:])/255.0*0.99) + 0.01, ndmin=2).T 
+    # Our values in our input vector are in the range from 0 to 255. Therefore we should divide input vector by 255, 
+    # multiply it by 0,99 and add 0,01 in order to get values in the range from 0,01 to 1.
+    
+    # Good practice transformation of the target value:
+    target = np.array(np.zeros(o_n) + 0.01, ndmin=2).T
+    target[int(observation[0])] = 0.99
+\end{lstlisting}
+
+Secondly, we can check our way to randomly assigned initial weights. Let's take a look once at the function we used to randomly assign them.
+
+\begin{lstlisting}[language=Python]
+    np.random.rand(3, 5)
+\end{lstlisting}
+
+\begin{lstlisting}
+    array([[ 0.22583725,  0.12109248,  0.02590624,  0.12690234,  0.62018663],
+    [ 0.81179976,  0.46311266,  0.71892529,  0.44099911,  0.43754171],
+    [ 0.49648974,  0.30002541,  0.04783774,  0.69393036,  0.58613769]])
+\end{lstlisting}
+
+As we can see, all the weights are positive, while the actual relationship between the features in the data and the values of the output vector can be negative. Hence, the way we employ to assign random weights should allow for negative weights too.
+
+Below there are too alternatives how this can be implemented in Python.
+
+\begin{lstlisting}[language=Python]
+    # Good practice for initial weights assignment:
+    
+    alternative1 = np.random.rand(3, 5) - 0.5 
+    # or
+    alternative2 = np.random.normal(0.0, pow(3, -0.5), (3, 5)) 
+    # arguments: Mean of the distribution, Standard deviation of the distribution, Output shape.
+    # Second approach is better as it takes in account the standard deviation 
+    # that is related to the number of incoming links into a node, 1/√(number of incoming links).
+    
+    # alternative1
+    alternative2
+
+    # Define the weights in accordance with the best practice:
+    w_i_h = np.random.normal(0.0, pow(h_n, -0.5), (h_n, i_n))
+    w_h_o = np.random.normal(0.0, pow(o_n, -0.5), (o_n, h_n))
+\end{lstlisting}
+
+Now that we have all the elements assigned in accordance with good practices, we can feedforward the data once again and evaluate the results by comparing the predictions to labels.
+
+\begin{lstlisting}[language=Python]
+    # Run NN to get new classification of the particular observation:
+    h_input = np.dot(w_i_h, input)
+    h_output = sigmoid(h_input)
+    o_input = np.dot(w_h_o, h_output)
+    o_output = sigmoid(o_input)
+
+    # Calculate the errors of the classification:
+    o_errors = target - o_output
+    o_errors
+\end{lstlisting}
+
+\begin{lstlisting}
+    array([[-0.06373055],
+    [-0.13887152],
+    [-0.95694188],
+    [ 0.28799234],
+    [-0.23295729],
+    [-0.21478192],
+    [-0.74462671],
+    [-0.65361842],
+    [-0.36623992],
+    [-0.46408493]])
+\end{lstlisting}
+
+The result we would like to achieve should look like a vector of values where almost all values are negligibly small except for the one value that has the position in the vector corresponding to the index of the true label. 
+
+It is not the case now. Nevertheless, one should remember that so far all the weights have been assigned randomly and no training has been performed. In any case, it is not a vector of ones anymore, which an improvement.
+
+Thus, we can proceed to the next stage, which is to find out where the errors come from and how they can be minimized.
