@@ -19,21 +19,17 @@ In this case we should do the following:
 For instance if weight w11 is 0.6 and w21 is 0.4 then they are associated with an error of -0.79x(0.6/1) and -0.79x(0.4/1) respectively (see Pictures below).
 
 \begin{figure}[H]
-    \includegraphics[width=\linewidth]{pics/bp_1.png}
+    \includegraphics[width=\linewidth]{pics/bp.jpg}
     \caption{\label{fig:bp1} Back propagation 1}
 \end{figure}
 
 After calculation of how much error is associated with every weight we can obtain the errors for the nodes in the proceeding layer.
  
-For instance error term for node 1 in the hidden layer will we equal to:
+For instance error term for node 1 in the hidden layer will be equal to:
 \begin{itemize}
-   \item the sum of errors associated with all the weights (w11 and w12 in our case) that link this node with the next layer. (see Picture below).
+   \item the sum of errors associated with all the weights (w11 and w12 in our case) that link this node with the next layer. (see Picture above).
 \end{itemize}
 
-\begin{figure}[H]
-    \includegraphics[width=\linewidth]{pics/bp_2.png}
-    \caption{\label{fig:bp2} Back propagation 2}
-\end{figure}
 
 Once we repeat this procedure for all the nodes in all layers we can find out how much every node should be changed.
 
