@@ -3,7 +3,8 @@
 The best way to understand how neural networks work is to build one yourself from scratch. The understanding becomes even more comprehensive if there is a particular problem that can be solved using NNs. Therefore let's start our work by taking a look at Figure \ref{fig:digit-classification}.
 
 \begin{figure}[H]
-    \includegraphics[width=\linewidth]{pics/problem.png}
+\centering
+    \includegraphics[scale=0.35]{pics/problem.png}
     \caption{\label{fig:digit-classification} Digit Classification Problem}
 \end{figure}
 
@@ -17,10 +18,10 @@ As we will see during the process of building our own NN, its output is based al
 
 NNs are inspired by human brain only to certain extent. For instance the main element that makes them similar is a multilayer net structure of simple elements that are connected in some way, receiving and transmitting information. But the structure of the human brain is much more complicated, besides it is self-organizing and adaptive in contrast to the fixed manually designed architecture of a NN. Hence, there is a good reason to stop being afraid of neural networks and instead to create one ourselves.
 
-\begin{figure}[H]
-    \includegraphics[width=\linewidth]{pics/neurons_net3.png}
-    \caption{\label{fig:real-neurons} Brain Neurons. Source: pixabay.com}
-\end{figure}
+% \begin{figure}[H]
+%     \includegraphics[width=\linewidth]{pics/neurons_net3.png}
+%     \caption{\label{fig:real-neurons} Brain Neurons. Source: pixabay.com}
+% \end{figure}
 
 
 \subsection{Schematic Representation}
@@ -79,7 +80,8 @@ In our case we have a structure with 3 layers: input, output and one hidden laye
 It is to certain extent inspired by the concept of firing, which means that neurons fire or transmit information further only if the input surpasses certain threshold. The simplest activation function can be represented by a step function as on the Figure \ref{fig:act-fct}. 
 
 \begin{figure}[H]
-    \includegraphics[width=\linewidth]{pics/step_function.png}
+    \centering
+    \includegraphics[scale=0.35]{pics/step_function.png}
     \caption{\label{fig:act-fct} Activation Functions. Source: Research Gate}
 \end{figure}
 
@@ -103,7 +105,8 @@ In our NN, we will use a slightly more elaborate activation function, the sigmoi
 \end{lstlisting}
 
 \begin{figure}[H]
-    \includegraphics[width=\linewidth]{pics/sigmoid.png}
+    \centering
+    \includegraphics[scale=0.5]{pics/sigmoid.png}
     \caption{\label{fig:sigmoid-fct} Sigmoid Function}
 \end{figure}
 
@@ -179,7 +182,8 @@ Using `matplotlib`, we can also reconstruct the original image based on the data
 \end{lstlisting}
 
 \begin{figure}[H]
-   \includegraphics[width=\linewidth]{pics/3.png}
+    \centering
+   \includegraphics[scale=0.5]{pics/3.png}
    \caption{\label{fig:number3} Plot of the handwritten number}
 \end{figure}
 
@@ -245,12 +249,14 @@ In the Figures \ref{fig:multiplication} and \ref{fig:activation}, you can see th
 This output will be used as the input vector that should be multiplied by the next weight matrix and transformed through activation function in order to calculate the final output of the NN. If our NN would have more than one hidden layer, the procedure would be repeated more times.
 
 \begin{figure}[H]
-    \includegraphics[width=\linewidth]{pics/multiplication.png}
+    \centering
+    \includegraphics[scale=0.4]{pics/multiplication.png}
     \caption{\label{fig:multiplication} How Weights Work}
 \end{figure}
 
 \begin{figure}[H]
-    \includegraphics[width=\linewidth]{pics/activation.jpg}
+    \centering
+    \includegraphics[scale=0.3]{pics/activation.jpg}
     \caption{\label{fig:activation} How Activation Works}
 \end{figure}
 
@@ -286,12 +292,12 @@ Below you can see the code implementation of all the steps for all layers of the
 
 \subsection{Good Practices on Data Treatment}
 
-Once we check the output of the NN and the results of each performed step, we can observe that already at the stage of the h\_output all the data converts to a vector in which all the values are equal to 1. Such a vector does not provide us with any helpful insight. Apparently, something is wrong with what we have done so far. There could be several reasons for the problem we face. Take a look at our sigmoid function in Figure \ref{fig:sigmoid-fct}.
+Once we check the output of the NN and the results of each performed step, we can observe that already at the stage of the h\_output all the data converts to a vector in which all the values are equal to 1. Such a vector does not provide us with any helpful insight. Apparently, something is wrong with what we have done so far. There could be several reasons for the problem we face. Take a look again at our sigmoid function in Figure \ref{fig:sigmoid-fct}.
 
-\begin{figure}[H]
-    \includegraphics[width=\linewidth]{pics/sigmoid.png}
-    \caption{\label{fig:sigmoid-fct} Sigmoid Function}
-\end{figure}
+% \begin{figure}[H]
+%     \includegraphics[width=\linewidth]{pics/sigmoid.png}
+%     \caption{\label{fig:sigmoid-fct} Sigmoid Function}
+% \end{figure}
 
 As we can see the output of the sigmoid function will be almost identical once we feed a number bigger than 2. Similarly there is no significant difference between the outputs if numbers used are smaller than -2. Hence the application of sigmoid function to the original data leads to a loss of valuable information. The NN has problems learning something from the inputs, which are almost undifferentiable.  
 

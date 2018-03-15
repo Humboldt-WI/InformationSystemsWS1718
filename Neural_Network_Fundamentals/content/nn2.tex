@@ -131,7 +131,8 @@ In code this can be represented as follows:
 Now, there is something else, we should add in the weights updating procedure. If we completely change our weights with every new observation - our model learns to predict only the last input. Instead of updating weights 100 \% every time we can change them only partially - this way every new observation will bring some new knowledge while the previous one will still be in memory even though updated to certain extent. The bigger the learning rate the more importance has the last observation, the smaller it is the more important is all the previous knowledge. The smaller the steps - the more accurate will be the prediction. At the same time it might take more time to learn.
 
 \begin{figure}[H]
-    \includegraphics[width=\linewidth]{pics/learning_rate.png}
+    \centering
+    \includegraphics[scale=0.5]{pics/learning_rate.png}
     \caption{\label{fig:bp} Learning Rate. Source: Business Analytics and Data Science Course by Professor S. Lessmann, Chapter 5: Artificial Neural Networks}
 \end{figure}
 
@@ -198,7 +199,8 @@ Once we have trained the model with 100 observations we can test it with new dat
 \end{lstlisting}
 
 \begin{figure}[H]
-   \includegraphics[width=\linewidth]{pics/7.png}
+    \centering
+   \includegraphics[scale=0.5]{pics/7.png}
    \caption{\label{fig:number7} Plot of the handwritten number}
 \end{figure}
 

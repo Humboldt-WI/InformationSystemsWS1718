@@ -15,7 +15,13 @@
 \usepackage[flushleft]{threeparttable}
 
 % Added Packages ========
-\usepackage{biblatex}
+\usepackage[
+    backend=biber,
+    style=nature,
+    citestyle=authoryear
+]{biblatex}
+
+
 \addbibresource{dl-bibliography.bib} 
 
 \usepackage[margin=1in]{geometry} % set margin to one inch
@@ -64,7 +70,7 @@
 \title{Fundamentals of Neural Networks}
 
 \author[1]{Denis Augusto Pinto Maciel}
-\author[1]{Roman Pro}
+\author[1]{Roman Proskalovich}
 \author[1]{Mahdi Bayat}
 
 \affil[1]{Humboldt University of Berlin, Berlin, Germany}
@@ -72,7 +78,7 @@
 \maketitle
 
 \begin{abstract}
-This article is a guide to help readers build a neural network from the very basics. It starts with an introduction to the concept of a neural networks concept and its early development. A step-by-step coding tutorial follows, through which relevant concepts are illustrated. Later in the post, there is also an introduction on how to build neural networks in Keras. Finally, the reader will find instructions on how to deploy the model via an API to make it accessible to anyone interested on it.
+This article is a guide to help readers build a neural network from the very basics. It starts with an introduction to the concept of a neural networks and its early development. A step-by-step coding tutorial follows, through which relevant concepts are illustrated in practice. A neural network is implemented in pure Python using only numpy, a linear algebra library. Finally, the Keras framework is presented and the same neural network is reimplemented on it. This time, however, with fewer lines of code.
 \end{abstract}
 
 \section{Introduction}
@@ -91,6 +97,9 @@ This article is a guide to help readers build a neural network from the very bas
 \label{sec:keras}
 \input{content/keras}
 
+\section{Conclusion}
+\input{content/conclusion}
+
 % BibTeX users please use one of
 %\bibliographystyle{spbasic}    % basic style, author-year citations
 %\bibliographystyle{spmpsci}     % mathematics and physical sciences
@@ -98,6 +107,8 @@ This article is a guide to help readers build a neural network from the very bas
 % \bibliographystyle{plain}
 % \bibliography{references}       % name your BibTeX data base
 
+\newpage
+\nocite{*}  
 \printbibliography
 \end{document}
 % end of file template.tex
