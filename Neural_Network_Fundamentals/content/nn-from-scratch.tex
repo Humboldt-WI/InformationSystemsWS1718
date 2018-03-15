@@ -24,7 +24,7 @@ NNs are inspired by human brain only to certain extent. For instance the main el
 
 
 \subsection{Schematic Representation}
-A complex multilayer structure that all neural networks have in common in a simplified way can be depicted using the following picture.
+A complex multilayer structure that all neural networks have in common in a simplified way can be depicted using the following Figure \ref{fig:nn-schema}.
 
 \begin{figure}[H]
     \includegraphics[width=\linewidth]{pics/neural_network1.jpg}
@@ -33,7 +33,7 @@ A complex multilayer structure that all neural networks have in common in a simp
 
 All we need in order to implement such a structure is base Python and numpy, a library for numerical computation, which we will be using to do linear algebra. 
 
-First let's determine the elements of a neural network depicted above: nodes, layers, weights across nodes and activation functions.
+First let's determine the elements of a neural network depicted on the Figure \ref{fig:nn-schema}: nodes, layers, weights across nodes and activation functions.
 
 \begin{itemize}
     \item \textbf{Nodes}. A node is basically a point where data points are received, processed and then transferred to the node. A node could be either an endpoint or a redistribution point or even both when iterations are done through the learning algorithm. The number of nodes to use is optional.
@@ -76,7 +76,14 @@ In our case we have a structure with 3 layers: input, output and one hidden laye
 \end{lstlisting}
 
 \item \textbf{Activation Function.} The remaining element of the NN's structure is an activation function - a function which transforms an input data point that it receives from the previous nodes to an output value which will be the input for the nodes in the next layer. The activation function plays an important role in the efficiency of the neural network as it accounts for non-linearity of data. 
-It is to certain extent inspired by the concept of firing, which means that neurons fire or transmit information further only if the input surpasses certain threshold. The simplest activation function can be represented by a step function as on the picture below!!!. In our NN, we will use a slightly more elaborate activation function, the sigmoid function (logistic), which allows for more efficient use of the input data. An extended description of various activation functions, their benefits and disadvantages is given in sections below.
+It is to certain extent inspired by the concept of firing, which means that neurons fire or transmit information further only if the input surpasses certain threshold. The simplest activation function can be represented by a step function as on the Figure \ref{fig:act-fct}. 
+
+\begin{figure}[H]
+    \includegraphics[width=\linewidth]{pics/sigmoid.png}
+    \caption{\label{fig:act-fct} Activation Functions}
+\end{figure}
+
+In our NN, we will use a slightly more elaborate activation function, the sigmoid function (logistic), which allows for more efficient use of the input data. A description of various activation functions, their benefits and disadvantages is given in sections below.
 
 \begin{lstlisting}[language=Python]
     # Determine activation function.
@@ -131,7 +138,13 @@ For the purposes of demonstration below we use a smaller dataset (100 images), w
     # Inspect the data - check the number of observations.
     # length of the object.
     len(data) 
+\end{lstlisting}
 
+\begin{lstlisting}
+    100
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python]
     # Inspect a particular observation of the data.
     # show observation number 0 from the list
     # (remember that in Python numbering starts from 0).
@@ -151,13 +164,6 @@ From the result above, we see that 1) a particular observation looks like a stri
 
 Using `matplotlib`, we can also reconstruct the original image based on the data about each pixel in the string.
 
-INSERT PICTURE!!!
-% Insert Matplotlib Grapg
-% \begin{figure}[H]
-%     \includegraphics[width=\linewidth]{pics/problem.png}
-%     \caption{\label{fig:digit-classification} Digit Classification Problem}
-% \end{figure}
-
 \begin{lstlisting}[language=Python]
     # Load the package to plot the data
     import matplotlib.pyplot as mpp
@@ -166,12 +172,16 @@ INSERT PICTURE!!!
     observation = data[0].split(',') # break down observation number 0 (comma is used to identify each element).
     image = np.asfarray(observation[1:]).reshape((28,28)) # take all the elements starting from the element 1 
     # (exclude element number 0, that corresponds to the label) and reshape them as an array with dimension 28 by 28.
-    mpp.imshow(image, cmap='Blues', interpolation='None') # show the plot of this array using blue pallete.
+    mpp.imshow(image, cmap='Blues', interpolation='None') # show the plot of this array using grey pallete.
 
     # Save an observation of the data as an input to work with.
     input = np.array(np.asfarray(observation[1:]), ndmin=2).T # save necessary elements in a vertical vector shape.
 \end{lstlisting}
 
+\begin{figure}[H]
+   \includegraphics[width=\linewidth]{pics/3.png}
+   \caption{\label{fig:number3} Plot the handwritten number}
+\end{figure}
 
     \subsection{Fitting the Structure of the NN to the Data}
 
