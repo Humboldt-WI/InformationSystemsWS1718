@@ -1,0 +1,115 @@
+\documentclass[a4paper, 11pt]{article}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+% \usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{authblk}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows,backgrounds,snakes,patterns}
+\usetikzlibrary{shapes,arrows,chains}
+\usepackage{verbatim}
+\usepackage{booktabs}
+
+\usepackage[flushleft]{threeparttable}
+
+% Added Packages ========
+\usepackage[
+    backend=biber,
+    style=nature,
+    citestyle=authoryear
+]{biblatex}
+
+
+\addbibresource{dl-bibliography.bib} 
+
+\usepackage[margin=1in]{geometry} % set margin to one inch
+\usepackage{float}
+\usepackage{blindtext}
+% Code highlighting
+\usepackage{listings} 
+\usepackage{color}
+% \usepackage{lmodern,textcomp}
+\usepackage{tgbonum}
+
+ 
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+% \lstset{basicstyle=\footnotesize\ttfamily,breaklines=true}
+
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\footnotesize\ttfamily,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+ 
+\lstset{style=mystyle}
+
+% 
+
+\begin{document}
+
+\title{Fundamentals of Neural Networks}
+
+\author[1]{Denis Augusto Pinto Maciel}
+\author[1]{Roman Proskalovich}
+\author[1]{Mahdi Bayat}
+
+\affil[1]{Humboldt University of Berlin, Berlin, Germany}
+
+\maketitle
+
+\begin{abstract}
+This article is a guide to help readers build a neural network from the very basics. It starts with an introduction to the concept of a neural networks and its early development. A step-by-step coding tutorial follows, through which relevant concepts are illustrated in practice. A neural network is implemented in pure Python using only numpy, a linear algebra library. Finally, the Keras framework is presented and the same neural network is reimplemented on it. This time, however, with fewer lines of code.
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+\input{content/intro}
+
+\section{Literature Review}
+\input{content/lit-review}
+
+\section{Neural Networks from Scratch}
+\label{sec:nn-from-scratch}
+\input{content/nn-from-scratch}
+\input{content/nn2}
+
+\section{Deep Learning with Keras}
+\label{sec:keras}
+\input{content/keras}
+
+\section{Conclusion}
+\input{content/conclusion}
+
+% BibTeX users please use one of
+%\bibliographystyle{spbasic}    % basic style, author-year citations
+%\bibliographystyle{spmpsci}     % mathematics and physical sciences
+%\bibliographystyle{spphys}     % APS-like style for physics
+% \bibliographystyle{plain}
+% \bibliography{references}       % name your BibTeX data base
+
+\newpage
+\nocite{*}  
+\printbibliography
+\end{document}
+% end of file template.tex
+
